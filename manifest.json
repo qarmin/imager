@@ -1,41 +1,80 @@
 {
-
   "manifest_version": 2,
   "name": "Imager",
   "version": "0.1",
-
   "description": "Allows to open bigger image on site",
-
   "icons": {
-  	"16": "icons/border-16.png",
-  	"32": "icons/border-32.png",
-  	"48": "icons/border-48.png"
+    "16": "icons/border-16.png",
+    "32": "icons/border-32.png",
+    "48": "icons/border-48.png"
   },
-
   "content_scripts": [
     {
-      "matches": ["*://*.mozilla.org/*","*://*.phoronix.com/*","*://*.wykop.pl/*"],
-      "js": ["imager.js", "popup.js"]
+      "matches": [
+        "*://*.mozilla.org/*",
+        "*://*.phoronix.com/*",
+        "*://*.wykop.pl/*"
+      ]
     }
   ],
-  
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "alarms",
+    "background",
+    "bookmarks",
+    "browserSettings",
+    "browsingData",
+    "captivePortal",
+    "clipboardRead",
+    "clipboardWrite",
+    "contentSettings",
+    "contextMenus",
+    "contextualIdentities",
+    "cookies",
+    "debugger",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "declarativeNetRequestWithHostAccess",
+    "dns",
+    "downloads",
+    "downloads.open",
+    "find",
+    "geolocation",
+    "history",
+    "identity",
+    "idle",
+    "management",
+    "menus",
+    "menus.overrideContext",
+    "nativeMessaging",
+    "notifications",
+    "pageCapture",
+    "pkcs11",
+    "privacy",
+    "proxy",
+    "scripting",
+    "search",
+    "sessions",
+    "storage",
+    "tabHide",
+    "tabs",
+    "theme",
+    "topSites",
+    "unlimitedStorage",
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking",
+    "webRequestFilterResponse",
+    "webRequestFilterResponse.serviceWorkerScript"
   ],
-
   "browser_action": {
-    "default_icon": "icons/beasts-32.png",
-    "default_title": "Beastify",
-    "default_popup": "popup/choose_beast.html",
-    
+    "default_icon": {
+      "16": "icons/border-16.png",
+      "32": "icons/border-32.png",
+      "48": "icons/border-48.png"
+    },
     "default_title": "Butotn",
-    "default_popup": "popup.html"
-  },
-
-  "web_accessible_resources": [
-    "beasts/frog.jpg",
-    "beasts/turtle.jpg",
-    "beasts/snake.jpg"
-  ]
+    "default_popup": "popup/pop.html"
+  }
 }
 
