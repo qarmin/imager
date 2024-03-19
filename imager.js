@@ -4,6 +4,13 @@ browser.runtime.onMessage.addListener((message) => {
   for (let url of message.imageUrls) {
     console.log(url);
   }
+  browser.tabs.executeScript(tabId, {
+      file: "/showImagesInGrid.js"
+  }).then(() => {
+      console.log("Script showImagesInGrid.js injected");
+  }).catch((error) => {
+      console.error("Error injecting script", error);
+  });
 });
 
 function processImages() {
@@ -20,7 +27,7 @@ function findImagesOnTab(tabId) {
     browser.tabs.executeScript(tabId, {
         file: "/findImages.js"
     }).then(() => {
-        console.log("Script injected");
+        console.log("Script findImages.js injected");
     }).catch((error) => {
         console.error("Error injecting script", error);
     });
