@@ -1,58 +1,88 @@
-{
+
+var imageUrls = [];
+var onlyImageUrls = [];
 try {
+// showMode - "biggestMode", "galleryMode"
+// followAElements - true, false
+// ignoreNonImageLinks - true, false
 
-
-let links = document.querySelectorAll('a');
-let images = document.querySelectorAll('img');
-let imageUrls = [];
-let notAddedImageUrls = [];
+var links = document.querySelectorAll('a');
+var images = document.querySelectorAll('img');
+var notAddedImageUrls = [];
 
 // Looks that some pages uses images as links, without proper extension
-let imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".tiff", ".ico"];
-let dissalowedExtensions = [".mp4"]
+var imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".tiff", ".ico"];
+var dissalowedExtensions = [".mp4"]
 
 
 function addImage(url, width, height) {
-  if (url != "" && !imageUrls.includes(url) && !notAddedImageUrls.includes(url) && !dissalowedExtensions.some(ext => url.endsWith(ext))) {
-//    if (imageExtensions.some(ext => url.endsWith(ext))) {
-        imageUrls.push({"src": url, "width": width, "height": height});
-        return true;
-//    }
-  }
-    return false;
-}
-
-
-for (let link of links) {
-  let image = link.querySelector('img');
-  if (image) {
-    let added = false;
-    added = addImage(link.href, image.width, image.height);
-    if (!added) {
-        addImage(image.src, image.width, image.height);
-    } else {
-        notAddedImageUrls.push(image.src);
+    if (url == "" || notAddedImageUrls.includes(url) || onlyImageUrls.includes(url) || dissalowedExtensions.some(ext => url.endsWith(ext))) {
+        return false;
     }
-  }
+    if (ignoreNonImageLinks && !imageExtensions.some(ext => url.includes(ext))) {
+        return false;
+    }
+
+    imageUrls.push({"src": url, "width": width, "height": height});
+    onlyImageUrls.push(url);
+    return true;
 }
 
+if (followAElements) {
+    for (var link of links) {
+      var image = link.querySelector('img');
+      if (image) {
+        var added = false;
+        added = addImage(link.href, image.width, image.height);
+        if (!added) {
+            addImage(image.src, image.width, image.height);
+        } else {
+            notAddedImageUrls.push(image.src);
+        }
+      }
+    }
+}
+
+// Iterate over all images
 for (const im of images) {
     addImage(im.src, im.width, im.height);
 }
 
-let scripts = document.getElementsByTagName('script');
- for (let i = scripts.length; i >= 0; i--) {
-   if (scripts[i]) {
-     scripts[i].parentNode.removeChild(scripts[i]);
-   }
- }
+
+console.error(scripts)
+console.error(document.body)
 
 document.body.innerHTML = '';
 document.body.style.backgroundColor = '#252525';
 document.body.style.height = '100vh';
 document.body.style.overflow = 'auto';
 
-let grid = null
+var all = []
+var scripts = document.getElementsByTagName('script');
+for (const script of scripts) {
+    all.push(script);
+}
+var metas = document.getElementsByTagName('meta');
+for (const meta of metas) {
+    all.push(meta);
+}
+var links = document.getElementsByTagName('link');
+for (const link of links) {
+    all.push(link);
+}
+
+ for (var i = all.length; i >= 0; i--) {
+   if (all[i] && all[i].parentNode) {
+     all[i].parentNode.removeChild(all[i]);
+   }
+ }
+
+//var elements = document.getElementsByTagName('script');
+//console.error(elements)
+var elements = document.getElementsByTagName('*');
+console.error(elements)
+
+var grid = null
 
 if (showMode === "biggestMode" && imageUrls.length > 0) {
   imageUrls.sort((a, b) => {
@@ -60,18 +90,18 @@ if (showMode === "biggestMode" && imageUrls.length > 0) {
   });
 imageUrls = [imageUrls[0]];
 } else {
-    document.createElement('div');
+    grid = document.createElement('div');
     grid.style.display = 'grid';
     grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
     grid.style.gridGap = '10px';
 }
 
-for (let all_info of imageUrls) {
-  let image_src = all_info.src;
-    let width = all_info.width;
-    let height = all_info.height;
+for (var all_info of imageUrls) {
+  var image_src = all_info.src;
+    var width = all_info.width;
+    var height = all_info.height;
 
-  let img = document.createElement('img');
+  var img = document.createElement('img');
   img.src = image_src;
   img.style.width = '100%';
   img.style.height = '100%';
@@ -94,17 +124,17 @@ for (let all_info of imageUrls) {
   });
     grid.appendChild(img);
   } else {
-    document.body.appendChild(img);
+    window.location.href = image_src;
   }
 }
 
 if (grid) {
     document.body.appendChild(grid);
+    window.scrollTo(0, 0);
 }
-window.scrollTo(0, 0);
+
 
 } catch (e) {
   console.error(e);
 }
-}
-undefined;
+imageUrls;

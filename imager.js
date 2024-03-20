@@ -2,24 +2,33 @@ console.log("Starting initialization of extension");
 
 function processImages(showMode) {
     browser.tabs.query({highlighted: true}).then((tabs) => {
-      for (let tab of tabs) {
-        findImagesOnTab(tab.id, showMode);
-      }
+      browser.storage.local.get('settings').then((res) => {
+          for (let tab of tabs) {
+            findImagesOnTab(tab.id, showMode, res["settings"]);
+          }
+      });
     }).catch((error) => {
       console.log(error);
     });
 }
 
-function findImagesOnTab(tabId, showMode) {
+function findImagesOnTab(tabId, showMode, settings) {
+    multilineCode = `
+    var showMode = "${showMode}";
+    var followAElements = ${settings["followAElements"]};
+    var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
+    `;
+    console.error(multilineCode)
+
     browser.tabs.executeScript(tabId, {
-        code: `var showMode = "${showMode}";`
+        code: multilineCode
     }).then(() => {
         // Then inject the findImages.js script
         return browser.tabs.executeScript(tabId, {
             file: "/findImages.js"
         });
-    }).then(() => {
-        console.log("Script findImages.js injected");
+    }).then((results) => {
+        console.log("Script findImages.js injected and returned", results);
     }).catch((error) => {
         console.error("Error injecting script", error);
     });
