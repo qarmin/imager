@@ -3,6 +3,7 @@ document.querySelector("#followAElements").addEventListener("change", saveOption
 document.querySelector("#ignoreNonImageLinks").addEventListener("change", saveOptions);
 document.querySelector("#rowsNumber").addEventListener("change", saveOptions);
 document.querySelector("#minimumImageSize").addEventListener("change", saveOptions);
+document.querySelector("#ignoredElements").addEventListener("change", saveOptions);
 
 function saveOptions(e) {
 	let key = e.target.id;
@@ -10,7 +11,7 @@ function saveOptions(e) {
 		modifiedSettings = res["settings"];
 		if (["followAElements", "ignoreNonImageLinks"].includes(key)) {
 			modifiedSettings[key] = e.target.checked;
-		} else if (["rowsNumber", "minimumImageSize"].includes(key)) {
+		} else if (["rowsNumber", "minimumImageSize", "ignoredElements"].includes(key)) {
 			modifiedSettings[key] = e.target.value;
 		} else {
 			console.error("Error saving option", e);
@@ -28,5 +29,6 @@ function restoreOptions() {
 		document.querySelector("#ignoreNonImageLinks").checked = res["settings"]["ignoreNonImageLinks"];
 		document.querySelector("#rowsNumber").value = res["settings"]["rowsNumber"];
 		document.querySelector("#minimumImageSize").value = res["settings"]["minimumImageSize"];
+		document.querySelector("#ignoredElements").value = res["settings"]["ignoredElements"];
 	});
 }

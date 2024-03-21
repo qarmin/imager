@@ -7,6 +7,7 @@ browser.storage.local.get("settings").then((res) => {
 			ignoreNonImageLinks: true,
 			rowsNumber: 6,
 			minimumImageSize: 100,
+			ignoredElements: "avatar",
 		};
 		browser.storage.local.set({
 			settings: newSettings,
@@ -23,6 +24,9 @@ browser.storage.local.get("settings").then((res) => {
 		}
 		if (newSettings["minimumImageSize"] === undefined) {
 			newSettings["minimumImageSize"] = 100;
+		}
+		if (newSettings["ignoredElements"] === undefined) {
+			newSettings["ignoredElements"] = "avatar";
 		}
 	}
 	browser.storage.local.set({
@@ -52,6 +56,7 @@ function findImagesOnTab(tabId, showMode, settings) {
     var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
     var rowsNumber = ${settings["rowsNumber"]};
     var minimumImageSize = ${settings["minimumImageSize"]};
+    var ignoredElements = "${settings["ignoredElements"]}";
     `;
 
 	browser.tabs

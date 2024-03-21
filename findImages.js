@@ -6,6 +6,9 @@ try {
 	// ignoreNonImageLinks - true, false
 	// rowsNumber - 1-infinity
 	// minimumImageSize - 1-infinity
+	// ignoredElements - "avatar,logo,icon"
+
+	console.error(ignoredElements, "AAAAAAAAAAAAAAAA");
 
 	var links = document.querySelectorAll("a");
 	var images = document.querySelectorAll("img");
@@ -28,7 +31,15 @@ try {
 			return false;
 		}
 		if (width < minimumImageSize || height < minimumImageSize) {
-		    return false;
+			return false;
+		}
+
+		if (ignoredElements) {
+			for (let el of ignoredElements.split(",")) {
+				if (el.length != 0 && url.includes(el)) {
+					return false;
+				}
+			}
 		}
 
 		imageUrls.push({ src: url, width: width, height: height });
