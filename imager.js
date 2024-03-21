@@ -1,12 +1,11 @@
-console.log("Starting initialization of extension");
-
 // Set default settings
 browser.storage.local.get('settings').then((res) => {
     newSettings = res["settings"];
     if (newSettings === undefined) {
         newSettings = {
             followAElements: true,
-            ignoreNonImageLinks: true
+            ignoreNonImageLinks: true,
+            rowsNumber: 6
         };
         browser.storage.local.set({
             settings: newSettings
@@ -17,6 +16,9 @@ browser.storage.local.get('settings').then((res) => {
         }
         if (newSettings["ignoreNonImageLinks"] === undefined) {
             newSettings["ignoreNonImageLinks"] = true;
+        }
+        if (newSettings["rowsNumber"] === undefined) {
+            newSettings["rowsNumber"] = 6;
         }
     }
     browser.storage.local.set({
@@ -32,7 +34,7 @@ function processImages(showMode) {
           }
       });
     }).catch((error) => {
-      console.log(error);
+      console.error(error);
     });
 }
 
@@ -41,6 +43,7 @@ function findImagesOnTab(tabId, showMode, settings) {
     var showMode = "${showMode}";
     var followAElements = ${settings["followAElements"]};
     var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
+    var rowsNumber = ${settings["rowsNumber"]};
     `;
 
     browser.tabs.executeScript(tabId, {
@@ -51,7 +54,7 @@ function findImagesOnTab(tabId, showMode, settings) {
             file: "/findImages.js"
         });
     }).then((results) => {
-        console.log("Script findImages.js injected and returned", results);
+        //console.log("Script findImages.js injected and returned", results);
     }).catch((error) => {
         console.error("Error injecting script", error);
     });
@@ -68,12 +71,8 @@ browser.menus.create({
   contexts: ["page"]
 });
 
-console.log('Adding listener for context menu item click');
 browser.menus.onClicked.addListener((info, tab) => {
-    console.log('Context menu item clicked', info, tab);
     if (["biggestMode", "galleryMode"].includes(info.menuItemId)) {
-        console.log('Context menu item clicked');
         processImages(info.menuItemId);
       }
 });
-console.log("Everything initialized!");
