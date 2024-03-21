@@ -5,23 +5,14 @@ try {
 	// followAElements - true, false
 	// ignoreNonImageLinks - true, false
 	// rowsNumber - 1-infinity
+	// minimumImageSize - 1-infinity
 
 	var links = document.querySelectorAll("a");
 	var images = document.querySelectorAll("img");
 	var notAddedImageUrls = [];
 
 	// Looks that some pages uses images as links, without proper extension
-	var imageExtensions = [
-		".jpg",
-		".jpeg",
-		".png",
-		".gif",
-		".webp",
-		".bmp",
-		".svg",
-		".tiff",
-		".ico",
-	];
+	var imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"];
 	var dissalowedExtensions = [".mp4"];
 
 	function addImage(url, width, height) {
@@ -33,10 +24,7 @@ try {
 		) {
 			return false;
 		}
-		if (
-			ignoreNonImageLinks &&
-			!imageExtensions.some((ext) => url.includes(ext))
-		) {
+		if (ignoreNonImageLinks && !imageExtensions.some((ext) => url.includes(ext))) {
 			return false;
 		}
 
@@ -117,15 +105,7 @@ try {
 
 		var aItem = document.createElement("a");
 		var img = document.createElement("img");
-		console.error(
-			img.width,
-			img.height,
-			width,
-			height,
-			img.naturalWidth,
-			img.naturalHeight,
-			image_src,
-		);
+		console.error(img.width, img.height, width, height, img.naturalWidth, img.naturalHeight, image_src);
 		aItem.href = image_src;
 		aItem.width = 100 / rowsNumber + "%";
 
@@ -144,13 +124,7 @@ try {
 					lowestIndex = i;
 				}
 			}
-			console.error(
-				itemsHeight[lowestIndex],
-				lowestIndex,
-				itemsHeight,
-				height / width,
-				image_src,
-			);
+			console.error(itemsHeight[lowestIndex], lowestIndex, itemsHeight, height / width, image_src);
 			itemsHeight[lowestIndex] += height / width;
 			items[lowestIndex].push(aItem);
 		} else {

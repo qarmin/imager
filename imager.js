@@ -6,6 +6,7 @@ browser.storage.local.get("settings").then((res) => {
 			followAElements: true,
 			ignoreNonImageLinks: true,
 			rowsNumber: 6,
+			minimumImageSize: 100,
 		};
 		browser.storage.local.set({
 			settings: newSettings,
@@ -19,6 +20,9 @@ browser.storage.local.get("settings").then((res) => {
 		}
 		if (newSettings["rowsNumber"] === undefined) {
 			newSettings["rowsNumber"] = 6;
+		}
+		if (newSettings["minimumImageSize"] === undefined) {
+			newSettings["minimumImageSize"] = 100;
 		}
 	}
 	browser.storage.local.set({
@@ -47,6 +51,7 @@ function findImagesOnTab(tabId, showMode, settings) {
     var followAElements = ${settings["followAElements"]};
     var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
     var rowsNumber = ${settings["rowsNumber"]};
+    var minimumImageSize = ${settings["minimumImageSize"]};
     `;
 
 	browser.tabs
