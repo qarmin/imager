@@ -49,10 +49,6 @@ for (const im of images) {
     addImage(im.src, im.width, im.height);
 }
 
-
-console.error(scripts)
-console.error(document.body)
-
 document.body.innerHTML = '';
 document.body.style.backgroundColor = '#252525';
 document.body.style.height = '100vh';
@@ -78,10 +74,6 @@ for (const link of links) {
    }
  }
 
-//var elements = document.getElementsByTagName('script');
-//console.error(elements)
-var elements = document.getElementsByTagName('*');
-console.error(elements)
 
 var grid = null
 
