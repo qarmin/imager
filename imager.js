@@ -1,5 +1,29 @@
 console.log("Starting initialization of extension");
 
+// Set default settings
+browser.storage.local.get('settings').then((res) => {
+    newSettings = res["settings"];
+    if (newSettings === undefined) {
+        newSettings = {
+            followAElements: true,
+            ignoreNonImageLinks: true
+        };
+        browser.storage.local.set({
+            settings: newSettings
+        });
+    } else {
+        if (newSettings["followAElements"] === undefined) {
+            newSettings["followAElements"] = true;
+        }
+        if (newSettings["ignoreNonImageLinks"] === undefined) {
+            newSettings["ignoreNonImageLinks"] = true;
+        }
+    }
+    browser.storage.local.set({
+        settings: newSettings
+    });
+});
+
 function processImages(showMode) {
     browser.tabs.query({highlighted: true}).then((tabs) => {
       browser.storage.local.get('settings').then((res) => {
@@ -18,7 +42,6 @@ function findImagesOnTab(tabId, showMode, settings) {
     var followAElements = ${settings["followAElements"]};
     var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
     `;
-    console.error(multilineCode)
 
     browser.tabs.executeScript(tabId, {
         code: multilineCode
