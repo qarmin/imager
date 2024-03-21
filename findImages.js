@@ -33,10 +33,12 @@ if (followAElements) {
     for (var link of links) {
       var image = link.querySelector('img');
       if (image) {
+          var im_height = image.naturalHeight || image.height;
+          var im_width = image.naturalWidth || image.width;
         var added = false;
-        added = addImage(link.href, image.width, image.height);
+        added = addImage(link.href, im_width, im_height);
         if (!added) {
-            addImage(image.src, image.width, image.height);
+            addImage(image.src, im_width, im_height);
         } else {
             notAddedImageUrls.push(image.src);
         }
@@ -46,7 +48,11 @@ if (followAElements) {
 
 // Iterate over all images
 for (const im of images) {
-    addImage(im.src, im.width, im.height);
+    if (im.naturalWidth === 0 || im.naturalHeight === 0) {
+        addImage(im.src, im.width, im.height);
+    } else {
+        addImage(im.src, im.naturalWidth, im.naturalHeight);
+    }
 }
 
 document.body.innerHTML = '';
@@ -74,19 +80,18 @@ for (const link of links) {
    }
  }
 
-
-var grid = null
-
 if (showMode === "biggestMode" && imageUrls.length > 0) {
   imageUrls.sort((a, b) => {
     return b.width * b.height - a.width * a.height;
   });
     imageUrls = [imageUrls[0]];
-} else {
-    grid = document.createElement('div');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(' + rowsNumber + ', 1fr)';
-    grid.style.gridGap = '10px';
+}
+
+let items= [];
+let itemsHeight = [];
+for (var i = 0; i < rowsNumber; i++) {
+    itemsHeight.push(0);
+    items.push([]);
 }
 
 for (var all_info of imageUrls) {
@@ -96,27 +101,57 @@ for (var all_info of imageUrls) {
 
     var aItem = document.createElement('a');
     var img = document.createElement('img');
+    console.error(img.width, img.height, width, height, img.naturalWidth, img.naturalHeight, image_src);
     aItem.href = image_src;
+    aItem.width = (100 / rowsNumber) + '%';
 
     img.src = image_src;
     img.style.objectFit = 'contain';
     img.style.width = '100%';
-    img.style.margin = '2px';
     aItem.appendChild(img);
 
 
-  if (grid) {
-    grid.appendChild(aItem);
+  if (showMode !== "biggestMode") {
+    // Find in itemsHeight the lowest index
+    var lowestIndex = 0;
+    var lowestValue = itemsHeight[0];
+    for (var i = 1; i < itemsHeight.length; i++) {
+      if (itemsHeight[i] < lowestValue) {
+        lowestValue = itemsHeight[i];
+        lowestIndex = i;
+      }
+    }
+    console.error(itemsHeight[lowestIndex], lowestIndex, itemsHeight, height / width, image_src);
+    itemsHeight[lowestIndex] += height / width;
+    items[lowestIndex].push(aItem);
   } else {
     window.location.href = image_src;
   }
 }
 
-if (grid) {
-    document.body.appendChild(grid);
-    window.scrollTo(0, 0);
+// Add items in columns - items[columnIndex] contains items
+if (showMode !== "biggestMode") {
+    var flexContainer = document.createElement('div');
+    flexContainer.style.display = 'flex';
+//    flexContainer.style.justifyContent = 'center';
+//    flexContainer.style.alignItems = 'center';
+//    flexContainer.style.flex = 1;
+    for (var i = 0; i < items.length; i++) {
+        var column = document.createElement('div');
+        column.style.display = 'flex';
+        column.style.flexDirection = 'column';
+        column.style.justifyContent = 'flex-start';
+        column.style.flex = 1;
+        for (var item of items[i]) {
+            item.style.margin = '5px';
+            column.appendChild(item);
+        }
+        flexContainer.appendChild(column);
+    }
+    document.body.appendChild(flexContainer);
 }
 
+window.scrollTo(0, 0);
 
 } catch (e) {
   console.error(e);
