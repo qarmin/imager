@@ -27,6 +27,9 @@ try {
 		if (ignoreNonImageLinks && !imageExtensions.some((ext) => url.includes(ext))) {
 			return false;
 		}
+		if (width < minimumImageSize || height < minimumImageSize) {
+		    return false;
+		}
 
 		imageUrls.push({ src: url, width: width, height: height });
 		onlyImageUrls.push(url);
