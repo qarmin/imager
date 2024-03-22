@@ -8,8 +8,6 @@ try {
 	// minimumImageSize - 1-infinity
 	// ignoredElements - "avatar,logo,icon"
 
-	console.error(ignoredElements, "AAAAAAAAAAAAAAAA");
-
 	var links = document.querySelectorAll("a");
 	var images = document.querySelectorAll("img");
 	var notAddedImageUrls = [];
@@ -138,7 +136,6 @@ try {
 					lowestIndex = i;
 				}
 			}
-			console.error(itemsHeight[lowestIndex], lowestIndex, itemsHeight, height / width, image_src);
 			itemsHeight[lowestIndex] += height / width;
 			items[lowestIndex].push(aItem);
 		} else {
@@ -148,24 +145,36 @@ try {
 
 	// Add items in columns - items[columnIndex] contains items
 	if (showMode !== "biggestMode") {
-		var flexContainer = document.createElement("div");
-		flexContainer.style.display = "flex";
-		//    flexContainer.style.justifyContent = 'center';
-		//    flexContainer.style.alignItems = 'center';
-		//    flexContainer.style.flex = 1;
-		for (var i = 0; i < items.length; i++) {
-			var column = document.createElement("div");
-			column.style.display = "flex";
-			column.style.flexDirection = "column";
-			column.style.justifyContent = "flex-start";
-			column.style.flex = 1;
-			for (var item of items[i]) {
-				item.style.margin = "5px";
-				column.appendChild(item);
-			}
-			flexContainer.appendChild(column);
+	    let calculateItemsNumber = items.reduce((acc, val) => acc + val.length, 0);
+	    if (calculateItemsNumber > 0) {
+            var flexContainer = document.createElement("div");
+            flexContainer.style.display = "flex";
+            for (var i = 0; i < items.length; i++) {
+                var column = document.createElement("div");
+                column.style.display = "flex";
+                column.style.flexDirection = "column";
+                column.style.justifyContent = "flex-start";
+                column.style.flex = 1;
+                for (var item of items[i]) {
+                    item.style.margin = "5px";
+                    column.appendChild(item);
+                }
+                flexContainer.appendChild(column);
+            }
+            document.body.appendChild(flexContainer);
+		} else {
+		 // Add text:
+		 // no images found to display.
+		 // check settings to verify if you have correct settings.
+		 // or use it on different page.
+
+		 var text = document.createElement("h1");
+		 text.style.color = "white";
+		 text.style.textAlign = "center";
+		 text.style.marginTop = "20%";
+		 text.innerText = "No images found to display.\nCheck settings to verify if you have correct settings.\nOr use it on different page.";
+		 document.body.appendChild(text);
 		}
-		document.body.appendChild(flexContainer);
 	}
 
 	window.scrollTo(0, 0);
