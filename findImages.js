@@ -117,7 +117,7 @@ try {
 
 		var aItem = document.createElement("a");
 		var img = document.createElement("img");
-		console.error(img.width, img.height, width, height, img.naturalWidth, img.naturalHeight, image_src);
+//		console.error(img.width, img.height, width, height, img.naturalWidth, img.naturalHeight, image_src);
 		aItem.href = image_src;
 		aItem.width = 100 / rowsNumber + "%";
 

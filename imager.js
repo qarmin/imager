@@ -69,7 +69,7 @@ browser.menus.create({
 });
 browser.menus.create({
 	id: "biggestMode",
-	title: "Only bigges",
+	title: "Show biggest",
 	contexts: ["page"],
 });
 
