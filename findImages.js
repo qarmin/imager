@@ -25,9 +25,12 @@ try {
 		) {
 			return false;
 		}
-		if (ignoreNonImageLinks && !imageExtensions.some((ext) => url.includes(ext))) {
+
+		let urlLower = url.toLowerCase();
+		if (ignoreNonImageLinks && !imageExtensions.some((ext) => urlLower.includes(ext))) {
 			return false;
 		}
+
 		if (width < minimumImageSize || height < minimumImageSize) {
 			return false;
 		}
@@ -39,7 +42,6 @@ try {
 				}
 			}
 		}
-
 		imageUrls.push({ src: url, width: width, height: height });
 		onlyImageUrls.push(url);
 		return true;
