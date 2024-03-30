@@ -9,4 +9,4 @@ After
 ![After](https://github.com/qarmin/imager/assets/41945903/4c8ec0d4-53a7-486c-aa84-eb4aa0fbe7d0)
 
 ## Usage
-At least for not this tool is not available in firefox store, so you need to install this manually(I don't know how)
+Plugin works only on firefox and can be installed on https://addons.mozilla.org/en-US/firefox/addon/imager/
