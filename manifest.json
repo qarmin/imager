@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Imager",
-	"version": "1.0",
+	"version": "1.1",
 	"permissions": ["menus", "contextMenus", "tabs", "<all_urls>", "storage"],
 	"background": {
 		"scripts": ["imager.js"]
