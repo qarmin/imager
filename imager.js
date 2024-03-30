@@ -1,22 +1,22 @@
 let settingsList = [
-    ["followAElements", true],
-    ["ignoreNonImageLinks", true],
-    ["rowsNumber", 6],
-    ["minimumImageSize", 100],
-    ["ignoredElements", "avatar,logo."]
+	["followAElements", true],
+	["ignoreNonImageLinks", true],
+	["rowsNumber", 6],
+	["minimumImageSize", 100],
+	["ignoredElements", "avatar,logo."],
 ];
 
 // Set default settings
 browser.storage.local.get("settings").then((res) => {
-    newSettings = res["settings"] || {};
-    for (let [setting, defaultValue] of settingsList) {
-        if (newSettings[setting] === undefined) {
-            newSettings[setting] = defaultValue;
-        }
-    }
-    browser.storage.local.set({
-        settings: newSettings,
-    });
+	newSettings = res["settings"] || {};
+	for (let [setting, defaultValue] of settingsList) {
+		if (newSettings[setting] === undefined) {
+			newSettings[setting] = defaultValue;
+		}
+	}
+	browser.storage.local.set({
+		settings: newSettings,
+	});
 });
 
 function processImages(showMode) {
