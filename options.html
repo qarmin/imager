@@ -2,19 +2,32 @@
 <html>
 <head>
     <title>Options</title>
+    <style>
+        .large-break {
+            margin-bottom: 10px; /* Adjust the value as needed */
+        }
+    </style>
 </head>
 <body>
+Options are set for two different modes: <br/>
+[IM] - Image mode - Used by "Biggest Mode" and "Gallery Mode" <br/>
+[LM] - Links Mode - Used by "Links Mode" <br/>
+
+<br class="large-break"/>
+
 <label>
     <input type="checkbox" id="followAElements">
-    Follow a elements - if image is inside an element, its href will be used instead image source <br/>
+    [IM] Follow a elements - if image is inside an element, its href will be used instead image source <br/>
     <input type="checkbox" id="ignoreNonImageLinks">
-    Ignore non-image links - if src not ends with .jpg, .png etc. it will be ignored <br/>
+    [IM] Ignore non-image links - if src not ends with .jpg, .png etc. it will be ignored <br/>
     <input type="number" id="rowsNumber">
-    Number of rows to use <br/>
+    [IM] Number of rows to use <br/>
     <input type="number" id="minimumImageSize">
-    Minimum image size to gather <br/>
+    [IM] Minimum image size to gather <br/>
     <input type="text" id="ignoredElements">
-    List of ignored elements inside url, split by comma <br/>
+    [IM] List of ignored elements inside url, split by comma <br/>
+    <input type="text" id="ignoredElementsLinksMode">
+    [LM] List of ignored elements inside url, split by comma <br/>
 </label>
 
 <script src="options.js"></script>

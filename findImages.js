@@ -1,5 +1,5 @@
-var imageUrls = [];
-var onlyImageUrls = [];
+let imageUrls = [];
+let onlyImageUrls = [];
 try {
 	// showMode - "biggestMode", "galleryMode"
 	// followAElements - true, false
@@ -8,13 +8,13 @@ try {
 	// minimumImageSize - 1-infinity
 	// ignoredElements - "avatar,logo,icon"
 
-	var links = document.querySelectorAll("a");
-	var images = document.querySelectorAll("img");
-	var notAddedImageUrls = [];
+	let links = document.querySelectorAll("a");
+	let images = document.querySelectorAll("img");
+	let notAddedImageUrls = [];
 
 	// Looks that some pages uses images as links, without proper extension
-	var imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"];
-	var dissalowedExtensions = [".mp4"];
+	let imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"];
+	let dissalowedExtensions = [".mp4"];
 
 	function addImage(url, width, height) {
 		if (
@@ -37,7 +37,7 @@ try {
 
 		if (ignoredElements) {
 			for (let el of ignoredElements.split(",")) {
-				if (el.length != 0 && url.includes(el)) {
+				if (el.length !== 0 && url.includes(el)) {
 					return false;
 				}
 			}
@@ -48,12 +48,12 @@ try {
 	}
 
 	if (followAElements) {
-		for (var link of links) {
-			var image = link.querySelector("img");
+		for (let link of links) {
+			let image = link.querySelector("img");
 			if (image) {
-				var im_height = image.naturalHeight || image.height;
-				var im_width = image.naturalWidth || image.width;
-				var added = false;
+				let im_height = image.naturalHeight || image.height;
+				let im_width = image.naturalWidth || image.width;
+				let added = false;
 				added = addImage(link.href, im_width, im_height);
 				if (!added) {
 					addImage(image.src, im_width, im_height);
@@ -73,25 +73,25 @@ try {
 		}
 	}
 
-
 	function removeAllItems() {
 		document.body.innerHTML = "";
+		document.body.style = null;
 
-		var all = [];
-		var scripts = document.getElementsByTagName("script");
+		let all = [];
+		let scripts = document.getElementsByTagName("script");
 		for (const script of scripts) {
 			all.push(script);
 		}
-		var metas = document.getElementsByTagName("meta");
+		let metas = document.getElementsByTagName("meta");
 		for (const meta of metas) {
 			all.push(meta);
 		}
-		var links = document.getElementsByTagName("link");
+		let links = document.getElementsByTagName("link");
 		for (const link of links) {
 			all.push(link);
 		}
 
-		for (var i = all.length; i >= 0; i--) {
+		for (let i = all.length; i >= 0; i--) {
 			if (all[i] && all[i].parentNode) {
 				all[i].parentNode.removeChild(all[i]);
 			}
@@ -112,19 +112,19 @@ try {
 
 	let items = [];
 	let itemsHeight = [];
-	for (var i = 0; i < rowsNumber; i++) {
+	for (let i = 0; i < rowsNumber; i++) {
 		itemsHeight.push(0);
 		items.push([]);
 	}
 
 	let setImageInBiggestMode = false;
-	for (var all_info of imageUrls) {
-		var image_src = all_info.src;
-		var width = all_info.width;
-		var height = all_info.height;
+	for (let all_info of imageUrls) {
+		let image_src = all_info.src;
+		let width = all_info.width;
+		let height = all_info.height;
 
-		var aItem = document.createElement("a");
-		var img = document.createElement("img");
+		let aItem = document.createElement("a");
+		let img = document.createElement("img");
 		//		console.error(img.width, img.height, width, height, img.naturalWidth, img.naturalHeight, image_src);
 		aItem.href = image_src;
 		aItem.width = 100 / rowsNumber + "%";
@@ -136,9 +136,9 @@ try {
 
 		if (showMode !== "biggestMode") {
 			// Find in itemsHeight the lowest index
-			var lowestIndex = 0;
-			var lowestValue = itemsHeight[0];
-			for (var i = 1; i < itemsHeight.length; i++) {
+			let lowestIndex = 0;
+			let lowestValue = itemsHeight[0];
+			for (let i = 1; i < itemsHeight.length; i++) {
 				if (itemsHeight[i] < lowestValue) {
 					lowestValue = itemsHeight[i];
 					lowestIndex = i;
@@ -153,7 +153,7 @@ try {
 	}
 
 	function setNoImagesFoundText() {
-		var text = document.createElement("h1");
+		let text = document.createElement("h1");
 		text.style.color = "white";
 		text.style.textAlign = "center";
 		text.style.marginTop = "20%";
@@ -174,15 +174,15 @@ try {
 	if (showMode !== "biggestMode") {
 		let calculateItemsNumber = items.reduce((acc, val) => acc + val.length, 0);
 		if (calculateItemsNumber > 0) {
-			var flexContainer = document.createElement("div");
+			let flexContainer = document.createElement("div");
 			flexContainer.style.display = "flex";
-			for (var i = 0; i < items.length; i++) {
-				var column = document.createElement("div");
+			for (let i = 0; i < items.length; i++) {
+				let column = document.createElement("div");
 				column.style.display = "flex";
 				column.style.flexDirection = "column";
 				column.style.justifyContent = "flex-start";
 				column.style.flex = 1;
-				for (var item of items[i]) {
+				for (let item of items[i]) {
 					item.style.margin = "5px";
 					column.appendChild(item);
 				}

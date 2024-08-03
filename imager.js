@@ -4,6 +4,7 @@ let settingsList = [
 	["rowsNumber", 6],
 	["minimumImageSize", 100],
 	["ignoredElements", "avatar,logo."],
+	["ignoredElementsLinksMode", "avatar,logo."],
 ];
 
 // Set default settings
@@ -46,12 +47,13 @@ function processItems(showMode) {
 
 function getSettingsVar(settings, showMode) {
 	return `
-    var showMode = "${showMode}";
-    var followAElements = ${settings["followAElements"]};
-    var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
-    var rowsNumber = ${settings["rowsNumber"]};
-    var minimumImageSize = ${settings["minimumImageSize"]};
-    var ignoredElements = "${settings["ignoredElements"]}";
+    let showMode = "${showMode}";
+    let followAElements = ${settings["followAElements"]};
+    let ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
+    let rowsNumber = ${settings["rowsNumber"]};
+    let minimumImageSize = ${settings["minimumImageSize"]};
+    let ignoredElements = "${settings["ignoredElements"]}";
+    let ignoredElementsLinksMode = "${settings["ignoredElementsLinksMode"]}";
     `;
 }
 

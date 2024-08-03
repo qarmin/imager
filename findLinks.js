@@ -1,50 +1,60 @@
 // extension -> list of links
-var collectedLinks = {};
-const WITHOUT_EXTENSION = "WITHOUT_EXTENSION";
+let collectedLinks = {};
+const WITHOUT_EXTENSION = "Without extension";
 const ITEMS_TO_REMOVE_FROM_START =  ["https://", "http://", "www."];
 try {
+	let fullCurrentUrl = window.location.href;
+	let currentUrlIsHttps = fullCurrentUrl.startsWith("https://");
+	let currentUrl = fullCurrentUrl.replace("http://", "").replace("https://", "").replace("www.", "");
+
+
+	let validatedElementsToIgnore = ignoredElementsLinksMode.split(",").map((el) => el.trim()).filter((el) => el.length !== 0);
+
 	function deduplicateArray(arr) {
 		return [...new Set(arr)];
 	}
 	function loadFromLinks() {
 		let allLinks = [];
 		let links = Array.from(document.querySelectorAll("a, img, video, source"));
-		let currentUrl = window.location.href;
 		for (let link of links) {
 			let href = link.href || link.src || link.currentSrc;
 			if (href) {
-				// TODO check if link is relative or absolute
-				allLinks.push(href);
+				if (!href.startsWith("http")) {
+					allLinks.push(fullCurrentUrl + href);
+				} else {
+					allLinks.push(href);
+				}
 			}
 		}
 		allLinks = deduplicateArray(allLinks);
 
 		for (let link of allLinks) {
 			// Cleaned link with deleted everything after ? or #
-			let cleanedLink = link.split("?")[0].split("#")[0];
-
-			// Remove items from the start of the link
-			for (let item of ITEMS_TO_REMOVE_FROM_START) {
-				if (cleanedLink.startsWith(item)) {
-					cleanedLink = cleanedLink.slice(item.length);
-				}
-			}
+			let cleanedRightLink = link.split("?")[0].split("#")[0];
 
 			// Remove / at the end of the link
-			if (cleanedLink.endsWith("/")) {
-				cleanedLink = cleanedLink.slice(0, -1);
+			if (cleanedRightLink.endsWith("/")) {
+				cleanedRightLink = cleanedRightLink.slice(0, -1);
+			}
+
+			// Remove items from the start of the link
+			let fullCleanerLink = cleanedRightLink;
+			for (let item of ITEMS_TO_REMOVE_FROM_START) {
+				if (fullCleanerLink.startsWith(item)) {
+					fullCleanerLink = fullCleanerLink.slice(item.length);
+				}
 			}
 
 			// Just site link, nothing more
-			if (cleanedLink.split("/").length === 1) {
+			if (fullCleanerLink.split("/").length === 1) {
 				if (collectedLinks[WITHOUT_EXTENSION] === undefined) {
 					collectedLinks[WITHOUT_EXTENSION] = [];
 				}
-				collectedLinks[WITHOUT_EXTENSION].push(cleanedLink);
+				collectedLinks[WITHOUT_EXTENSION].push(cleanedRightLink);
 				continue;
 			}
 
-			let lastPart = cleanedLink.split("/").pop();
+			let lastPart = cleanedRightLink.split("/").pop();
 			let extension;
 			if (lastPart.includes(".")) {
 				extension = lastPart.split(".").pop().toLowerCase();
@@ -55,7 +65,7 @@ try {
 				collectedLinks[extension] = [];
 			}
 			// console.error(collectedLinks[extension]);
-			collectedLinks[extension].push(cleanedLink);
+			collectedLinks[extension].push(cleanedRightLink);
 		}
 	}
 	function isAlphanumeric(char) {
@@ -74,18 +84,21 @@ try {
 				.replace(/%3F/g, "?")
 				.replace(/%3D/g, "=")
 				.replace(/%2C/g, ",")
-				.replace(/https:\/\//g, "http://")
+				// .replace(/https:\/\//g, "http://")
 				.replace(/http:\/\/www\./g, "http://")
+				.replace(/https:\/\/www\./g, "https://")
 				.replace(/http:\/\//g, "\nhttp://")
+				.replace(/https:\/\//g, "\nhttps://")
 				.replace("#", "\n")
 				.replace("&", "\n")
 				.replace(" ", "\n")
 			let splits = content.split("\n");
 			let links = []
 			for (const split of splits) {
-				if (!split.startsWith("http://")) {
+				if (!(split.startsWith("http://") || split.startsWith("https://"))) {
 					continue;
 				}
+				console.info("SPLIT - ", split);
 				let link = "";
 				for (const char of split) {
 					if (char === "?") {
@@ -131,7 +144,7 @@ try {
 				collectedLinks[extension].push(lnk);
 			}
 
-			console.error(collectedLinks);
+			// console.error(collectedLinks);
 
 		} catch (e) {
 			console.error("ERROR - ", e);
@@ -140,22 +153,23 @@ try {
 
 	function removeAllItems() {
 		document.body.innerHTML = "";
+		document.body.style = null;
 
-		var all = [];
-		var scripts = document.getElementsByTagName("script");
+		let all = [];
+		let scripts = document.getElementsByTagName("script");
 		for (const script of scripts) {
 			all.push(script);
 		}
-		var metas = document.getElementsByTagName("meta");
+		let metas = document.getElementsByTagName("meta");
 		for (const meta of metas) {
 			all.push(meta);
 		}
-		var links = document.getElementsByTagName("link");
+		let links = document.getElementsByTagName("link");
 		for (const link of links) {
 			all.push(link);
 		}
 
-		for (var i = all.length; i >= 0; i--) {
+		for (let i = all.length; i >= 0; i--) {
 			if (all[i] && all[i].parentNode) {
 				all[i].parentNode.removeChild(all[i]);
 			}
@@ -163,7 +177,8 @@ try {
 	}
 
 
-	// loadFromLinks()
+	// Sometimes links are not in href/src
+	loadFromLinks()
 	loadFromDocumentBody()
 
 	removeAllItems();
@@ -183,19 +198,28 @@ try {
 		collectedLinksKeys.push(WITHOUT_EXTENSION);
 	}
 
-	for (const key in collectedLinksKeys) {
+	for (const key of collectedLinksKeys) {
 		newHtml += `<h2>${key}</h2>`;
-		for (const link of collectedLinks[key]) {
+		let links = collectedLinks[key];
+		links.sort();
+		if (validatedElementsToIgnore.length !== 0) {
+			links = links.filter((link) => {
+				for (const el of validatedElementsToIgnore) {
+					if (link.includes(el)) {
+						return false;
+					}
+				}
+				return true;
+			});
+		}
+		links = deduplicateArray(links);
+
+		for (const link of links) {
 			newHtml += `<a href="${link}" style="color: #ffffff;">${link}</a><br>`;
 		}
 	}
 
 	document.body.innerHTML = newHtml;
-
-
-	// console.error(allLinks);
-	// console.error(currentUrl)
-	// console.error(collectedLinks);
 
 	window.scrollTo(0, 0);
 } catch (e) {
