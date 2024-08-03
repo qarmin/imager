@@ -73,30 +73,35 @@ try {
 		}
 	}
 
-	document.body.innerHTML = "";
+
+	function removeAllItems() {
+		document.body.innerHTML = "";
+
+		var all = [];
+		var scripts = document.getElementsByTagName("script");
+		for (const script of scripts) {
+			all.push(script);
+		}
+		var metas = document.getElementsByTagName("meta");
+		for (const meta of metas) {
+			all.push(meta);
+		}
+		var links = document.getElementsByTagName("link");
+		for (const link of links) {
+			all.push(link);
+		}
+
+		for (var i = all.length; i >= 0; i--) {
+			if (all[i] && all[i].parentNode) {
+				all[i].parentNode.removeChild(all[i]);
+			}
+		}
+	}
+
+	removeAllItems();
 	document.body.style.backgroundColor = "#252525";
 	document.body.style.height = "100vh";
 	document.body.style.overflow = "auto";
-
-	var all = [];
-	var scripts = document.getElementsByTagName("script");
-	for (const script of scripts) {
-		all.push(script);
-	}
-	var metas = document.getElementsByTagName("meta");
-	for (const meta of metas) {
-		all.push(meta);
-	}
-	var links = document.getElementsByTagName("link");
-	for (const link of links) {
-		all.push(link);
-	}
-
-	for (var i = all.length; i >= 0; i--) {
-		if (all[i] && all[i].parentNode) {
-			all[i].parentNode.removeChild(all[i]);
-		}
-	}
 
 	if (showMode === "biggestMode" && imageUrls.length > 0) {
 		imageUrls.sort((a, b) => {

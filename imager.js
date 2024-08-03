@@ -19,13 +19,23 @@ browser.storage.local.get("settings").then((res) => {
 	});
 });
 
-function processImages(showMode) {
+function processItems(showMode) {
+	let fileName ;
+	if (["biggestMode", "galleryMode"].includes(showMode)) {
+		fileName = "./findImages.js";
+	} else if (["collectLinksMode"].includes(showMode)) {
+		fileName = "./findLinks.js";
+	} else {
+		console.error("Unknown showMode", showMode);
+		return;
+	}
+
 	browser.tabs
 		.query({ highlighted: true })
 		.then((tabs) => {
 			browser.storage.local.get("settings").then((res) => {
 				for (let tab of tabs) {
-					findImagesOnTab(tab.id, showMode, res["settings"]);
+					injectCode(tab.id, showMode, res["settings"], fileName);
 				}
 			});
 		})
@@ -34,8 +44,8 @@ function processImages(showMode) {
 		});
 }
 
-function findImagesOnTab(tabId, showMode, settings) {
-	multilineCode = `
+function getSettingsVar(settings, showMode) {
+	return `
     var showMode = "${showMode}";
     var followAElements = ${settings["followAElements"]};
     var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
@@ -43,6 +53,10 @@ function findImagesOnTab(tabId, showMode, settings) {
     var minimumImageSize = ${settings["minimumImageSize"]};
     var ignoredElements = "${settings["ignoredElements"]}";
     `;
+}
+
+function injectCode(tabId, showMode, settings, fileName) {
+	multilineCode = getSettingsVar(settings, showMode);
 
 	browser.tabs
 		.executeScript(tabId, {
@@ -51,7 +65,7 @@ function findImagesOnTab(tabId, showMode, settings) {
 		.then(() => {
 			// Then inject the findImages.js script
 			return browser.tabs.executeScript(tabId, {
-				file: "/findImages.js",
+				file: fileName,
 			});
 		})
 		.then((results) => {
@@ -72,9 +86,16 @@ browser.menus.create({
 	title: "Show biggest",
 	contexts: ["page"],
 });
+browser.menus.create({
+	id: "collectLinksMode",
+	title: "Collect links",
+	contexts: ["page"],
+});
 
 browser.menus.onClicked.addListener((info, tab) => {
-	if (["biggestMode", "galleryMode"].includes(info.menuItemId)) {
-		processImages(info.menuItemId);
+	if (["biggestMode", "galleryMode", "collectLinksMode"].includes(info.menuItemId)) {
+		processItems(info.menuItemId);
+	} else {
+		console.error("Unknown menu item", info.menuItemId);
 	}
 });
