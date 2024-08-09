@@ -221,7 +221,9 @@ try {
 		}
 	}
 
-	document.body.innerHTML = newHtml;
+	const newDiv = document.createElement("div");
+	newDiv.innerHTML = newHtml;
+	document.body.appendChild(newDiv);
 
 	window.scrollTo(0, 0);
 } catch (e) {
