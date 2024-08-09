@@ -190,7 +190,6 @@ try {
 
 	// Replace site content with
 
-	let newHtml = "";
 	let collectedLinksKeys = Object.keys(collectedLinks);
 	collectedLinksKeys.sort();
 
@@ -200,8 +199,13 @@ try {
 		collectedLinksKeys.push(WITHOUT_EXTENSION);
 	}
 
+	const contentDiv = document.createElement("div");
+
 	for (const key of collectedLinksKeys) {
-		newHtml += `<h2>${key}</h2>`;
+		const h2 = document.createElement("h2");
+		h2.textContent = key;
+		contentDiv.appendChild(h2);
+
 		let links = collectedLinks[key];
 		links.sort();
 		if (validatedElementsToIgnore.length !== 0) {
@@ -217,13 +221,15 @@ try {
 		links = deduplicateArray(links);
 
 		for (const link of links) {
-			newHtml += `<a href="${link}" style="color: #ffffff;">${link}</a><br>`;
+			const a = document.createElement("a");
+			a.href = link;
+			a.style.color = "#ffffff";
+			a.textContent = link;
+			contentDiv.appendChild(a);
+			contentDiv.appendChild(document.createElement("br"));
 		}
 	}
-
-	const newDiv = document.createElement("div");
-	newDiv.innerHTML = newHtml;
-	document.body.appendChild(newDiv);
+	document.body.appendChild(contentDiv);
 
 	window.scrollTo(0, 0);
 } catch (e) {
