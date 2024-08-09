@@ -1,6 +1,7 @@
 let settingsList = [
 	["followAElements", true],
 	["ignoreNonImageLinks", true],
+	["loadImagesLazy", false],
 	["rowsNumber", 6],
 	["minimumImageSize", 100],
 	["ignoredElements", "avatar,logo."],
@@ -21,7 +22,7 @@ browser.storage.local.get("settings").then((res) => {
 });
 
 function processItems(showMode) {
-	let fileName ;
+	let fileName;
 	if (["biggestMode", "galleryMode"].includes(showMode)) {
 		fileName = "./findImages.js";
 	} else if (["collectLinksMode"].includes(showMode)) {
@@ -50,6 +51,7 @@ function getSettingsVar(settings, showMode) {
     let showMode = "${showMode}";
     let followAElements = ${settings["followAElements"]};
     let ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
+    let loadImagesLazy = ${settings["loadImagesLazy"]};
     let rowsNumber = ${settings["rowsNumber"]};
     let minimumImageSize = ${settings["minimumImageSize"]};
     let ignoredElements = "${settings["ignoredElements"]}";

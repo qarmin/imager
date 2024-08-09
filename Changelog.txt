@@ -1,0 +1,7 @@
+1.3.0 - 09.09.2024
+- Added new mode to gather links from site
+- Added option to load images lazily
+
+
+1.2.1 - 30.03.2024
+- Fixed problem with not recognizing images with non lowercase extensions(like image.JPG)

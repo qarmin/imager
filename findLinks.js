@@ -1,14 +1,16 @@
 // extension -> list of links
 let collectedLinks = {};
 const WITHOUT_EXTENSION = "Without extension";
-const ITEMS_TO_REMOVE_FROM_START =  ["https://", "http://", "www."];
+const ITEMS_TO_REMOVE_FROM_START = ["https://", "http://", "www."];
 try {
 	let fullCurrentUrl = window.location.href;
 	let currentUrlIsHttps = fullCurrentUrl.startsWith("https://");
 	let currentUrl = fullCurrentUrl.replace("http://", "").replace("https://", "").replace("www.", "");
 
-
-	let validatedElementsToIgnore = ignoredElementsLinksMode.split(",").map((el) => el.trim()).filter((el) => el.length !== 0);
+	let validatedElementsToIgnore = ignoredElementsLinksMode
+		.split(",")
+		.map((el) => el.trim())
+		.filter((el) => el.length !== 0);
 
 	function deduplicateArray(arr) {
 		return [...new Set(arr)];
@@ -70,15 +72,18 @@ try {
 	}
 	function isAlphanumeric(char) {
 		const code = char.charCodeAt(0);
-		return (code >= 48 && code <= 57) || // 0-9
+		return (
+			(code >= 48 && code <= 57) || // 0-9
 			(code >= 65 && code <= 90) || // A-Z
-			(code >= 97 && code <= 122);  // a-z
+			(code >= 97 && code <= 122) // a-z
+		);
 	}
 
 	function loadFromDocumentBody() {
 		try {
 			let content = document.body.outerHTML;
-			content = content.replace(/%3A/g, ":")
+			content = content
+				.replace(/%3A/g, ":")
 				.replace(/%2F/g, "/")
 				.replace(/&amp/g, "&")
 				.replace(/%3F/g, "?")
@@ -91,9 +96,9 @@ try {
 				.replace(/https:\/\//g, "\nhttps://")
 				.replace("#", "\n")
 				.replace("&", "\n")
-				.replace(" ", "\n")
+				.replace(" ", "\n");
 			let splits = content.split("\n");
-			let links = []
+			let links = [];
 			for (const split of splits) {
 				if (!(split.startsWith("http://") || split.startsWith("https://"))) {
 					continue;
@@ -104,13 +109,12 @@ try {
 					if (char === "?") {
 						// link += char // TODO add as option
 						break;
-					} else if (['/', '.', ':', '_', '-', '=', '[', ']', '%', '$', '+'
-						, '!', '*'].includes(char)) {
+					} else if (["/", ".", ":", "_", "-", "=", "%", "$", "+", "!", "*"].includes(char)) {
 						link += char;
 					} else if (isAlphanumeric(char)) {
 						link += char;
 					} else {
-						if (['>', '"', '<', '\'', '@', '\\'].includes(char)) {
+						if ([">", '"', "<", "'", "@", "\\", "(", ")", "[", "]", ","].includes(char)) {
 							// TODO
 						}
 						break;
@@ -121,8 +125,8 @@ try {
 				}
 				links.push(link);
 			}
-			links = deduplicateArray(links);
 			links.sort();
+			links = deduplicateArray(links);
 
 			for (const lnk of links) {
 				let lastPart = lnk.split("/").pop();
@@ -145,7 +149,6 @@ try {
 			}
 
 			// console.error(collectedLinks);
-
 		} catch (e) {
 			console.error("ERROR - ", e);
 		}
@@ -176,10 +179,9 @@ try {
 		}
 	}
 
-
 	// Sometimes links are not in href/src
-	loadFromLinks()
-	loadFromDocumentBody()
+	loadFromLinks();
+	loadFromDocumentBody();
 
 	removeAllItems();
 	document.body.style.backgroundColor = "#252525";

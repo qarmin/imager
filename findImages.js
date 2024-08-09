@@ -4,9 +4,11 @@ try {
 	// showMode - "biggestMode", "galleryMode"
 	// followAElements - true, false
 	// ignoreNonImageLinks - true, false
+	// loadImagesLazy - true, false
 	// rowsNumber - 1-infinity
 	// minimumImageSize - 1-infinity
-	// ignoredElements - "avatar,logo,icon"
+	// ignoredElements - "avatar,logo."
+	// ignoredElementsLinksMode - "avatar,logo"
 
 	let links = document.querySelectorAll("a");
 	let images = document.querySelectorAll("img");
@@ -130,6 +132,10 @@ try {
 		aItem.width = 100 / rowsNumber + "%";
 
 		img.src = image_src;
+		if (loadImagesLazy) {
+			img.loading = "lazy";
+		}
+		img.alt = image_src;
 		img.style.objectFit = "contain";
 		img.style.width = "100%";
 		aItem.appendChild(img);
