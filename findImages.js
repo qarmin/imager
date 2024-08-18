@@ -9,6 +9,7 @@ try {
 	// minimumImageSize - 1-infinity
 	// ignoredElements - "avatar,logo."
 	// ignoredElementsLinksMode - "avatar,logo"
+	// usingCustomImageGathering - true, false
 
 	let links = document.querySelectorAll("a");
 	let images = document.querySelectorAll("img");
@@ -16,19 +17,44 @@ try {
 
 	// Looks that some pages uses images as links, without proper extension
 	let imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"];
-	let dissalowedExtensions = [".mp4"];
+	let disallowedExtensions = [".mp4"];
+
+	function processCustomImageLink(url) {
+		if (!usingCustomImageGathering) {
+			return url;
+		}
+		if (url.includes("wykop.pl")) {
+			// find latest , and remove everything after it without extension
+			// https://wykop.pl/cdn/7c4cda5db7d1493f05c7-4b44df189463bab1b45cced887282d0b/tag_background_rosja_7jWWpsfN20t4eWrGPsRY,w1260.jpg
+			let lastCommaIndex = url.lastIndexOf(",");
+			let lastDotIndex = url.lastIndexOf(".");
+			if (lastDotIndex === -1) {
+				return url;
+			}
+			let extension = url.slice(lastDotIndex);
+			if (lastCommaIndex !== -1) {
+				url = url.slice(0, lastCommaIndex) + extension;
+			}
+		}
+		return url;
+	}
+
+	function deduplicateArray(arr) {
+		return [...new Set(arr)];
+	}
 
 	function addImage(url, width, height) {
+		let validatedUrl = processCustomImageLink(url);
 		if (
-			url == "" ||
-			notAddedImageUrls.includes(url) ||
-			onlyImageUrls.includes(url) ||
-			dissalowedExtensions.some((ext) => url.endsWith(ext))
+			validatedUrl == "" ||
+			notAddedImageUrls.includes(validatedUrl) ||
+			onlyImageUrls.includes(validatedUrl) ||
+			disallowedExtensions.some((ext) => validatedUrl.endsWith(ext))
 		) {
 			return false;
 		}
 
-		let urlLower = url.toLowerCase();
+		let urlLower = validatedUrl.toLowerCase();
 		if (ignoreNonImageLinks && !imageExtensions.some((ext) => urlLower.includes(ext))) {
 			return false;
 		}
@@ -39,13 +65,13 @@ try {
 
 		if (ignoredElements) {
 			for (let el of ignoredElements.split(",")) {
-				if (el.length !== 0 && url.includes(el)) {
+				if (el.length !== 0 && validatedUrl.includes(el)) {
 					return false;
 				}
 			}
 		}
-		imageUrls.push({ src: url, width: width, height: height });
-		onlyImageUrls.push(url);
+		imageUrls.push({ src: validatedUrl, width: width, height: height });
+		onlyImageUrls.push(validatedUrl);
 		return true;
 	}
 

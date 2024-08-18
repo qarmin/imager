@@ -1,3 +1,6 @@
+1.3.1 - 18.09.2024
+- Add special rule for loading images with bigger resolution for some sites(for now only wykop is supported)
+
 1.3.0 - 09.09.2024
 - Added new mode to gather links from site
 - Added option to load images lazily

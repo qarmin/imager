@@ -52,7 +52,7 @@ try {
 				if (collectedLinks[WITHOUT_EXTENSION] === undefined) {
 					collectedLinks[WITHOUT_EXTENSION] = [];
 				}
-				collectedLinks[WITHOUT_EXTENSION].push(cleanedRightLink);
+				collectedLinks[WITHOUT_EXTENSION].push(processCustomImageLink(cleanedRightLink));
 				continue;
 			}
 
@@ -67,9 +67,30 @@ try {
 				collectedLinks[extension] = [];
 			}
 			// console.error(collectedLinks[extension]);
-			collectedLinks[extension].push(cleanedRightLink);
+			collectedLinks[extension].push(processCustomImageLink(cleanedRightLink));
 		}
 	}
+
+	function processCustomImageLink(url) {
+		if (!usingCustomImageGathering) {
+			return url;
+		}
+		if (url.includes("wykop.pl")) {
+			// find latest , and remove everything after it without extension
+			// https://wykop.pl/cdn/7c4cda5db7d1493f05c7-4b44df189463bab1b45cced887282d0b/tag_background_rosja_7jWWpsfN20t4eWrGPsRY,w1260.jpg
+			let lastCommaIndex = url.lastIndexOf(",");
+			let lastDotIndex = url.lastIndexOf(".");
+			if (lastDotIndex === -1) {
+				return url;
+			}
+			let extension = url.slice(lastDotIndex);
+			if (lastCommaIndex !== -1) {
+				url = url.slice(0, lastCommaIndex) + extension;
+			}
+		}
+		return url;
+	}
+
 	function isAlphanumeric(char) {
 		const code = char.charCodeAt(0);
 		return (
@@ -103,7 +124,7 @@ try {
 				if (!(split.startsWith("http://") || split.startsWith("https://"))) {
 					continue;
 				}
-				console.info("SPLIT - ", split);
+
 				let link = "";
 				for (const char of split) {
 					if (char === "?") {
@@ -123,7 +144,7 @@ try {
 				if (link.endsWith("/")) {
 					link = link.slice(0, -1);
 				}
-				links.push(link);
+				links.push(processCustomImageLink(link));
 			}
 			links.sort();
 			links = deduplicateArray(links);

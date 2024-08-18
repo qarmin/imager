@@ -2,6 +2,7 @@ let settingsList = [
 	["followAElements", true],
 	["ignoreNonImageLinks", true],
 	["loadImagesLazy", false],
+	["usingCustomImageGathering", true],
 	["rowsNumber", 6],
 	["minimumImageSize", 100],
 	["ignoredElements", "avatar,logo."],
@@ -52,6 +53,7 @@ function getSettingsVar(settings, showMode) {
     let followAElements = ${settings["followAElements"]};
     let ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
     let loadImagesLazy = ${settings["loadImagesLazy"]};
+    let usingCustomImageGathering = ${settings["usingCustomImageGathering"]};
     let rowsNumber = ${settings["rowsNumber"]};
     let minimumImageSize = ${settings["minimumImageSize"]};
     let ignoredElements = "${settings["ignoredElements"]}";
