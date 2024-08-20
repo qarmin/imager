@@ -10,6 +10,7 @@ try {
 	// ignoredElements - "avatar,logo."
 	// ignoredElementsLinksMode - "avatar,logo"
 	// usingCustomImageGathering - true, false
+	// delayBetweenImages - -infinity-infinity - lower than 0 means no delay
 
 	let links = document.querySelectorAll("a");
 	let images = document.querySelectorAll("img");
@@ -157,7 +158,9 @@ try {
 		aItem.href = image_src;
 		aItem.width = 100 / rowsNumber + "%";
 
-		img.src = image_src;
+		if (delayBetweenImages <= 0) {
+			img.src = image_src;
+		}
 		if (loadImagesLazy) {
 			img.loading = "lazy";
 		}
@@ -221,6 +224,35 @@ try {
 				flexContainer.appendChild(column);
 			}
 			document.body.appendChild(flexContainer);
+
+			if (delayBetweenImages > 0) {
+				const script = document.createElement("script");
+				script.textContent = `
+    (function() {
+      let index = 0;
+      const images = document.querySelectorAll('img');
+
+		console.error("Current images", index, images.length);
+      function loadNextImage() {
+      console.error("Current images", index, images.length);
+        if (index >= images.length) {
+          return;
+        }
+
+        const img = images[index];
+        if (img && img.alt) {
+          img.src = img.alt;
+        }
+
+        index++;
+        setTimeout(loadNextImage, ${delayBetweenImages});
+      }
+
+      loadNextImage();
+    })();
+  `;
+				document.body.appendChild(script);
+			}
 		} else {
 			setNoImagesFoundText();
 		}

@@ -5,6 +5,7 @@ let settingsList = [
 	["usingCustomImageGathering", true],
 	["rowsNumber", 6],
 	["minimumImageSize", 100],
+	["delayBetweenImages", 0],
 	["ignoredElements", "avatar,logo."],
 	["ignoredElementsLinksMode", "avatar,logo."],
 ];
@@ -58,6 +59,7 @@ function getSettingsVar(settings, showMode) {
     let minimumImageSize = ${settings["minimumImageSize"]};
     let ignoredElements = "${settings["ignoredElements"]}";
     let ignoredElementsLinksMode = "${settings["ignoredElementsLinksMode"]}";
+    let delayBetweenImages = "${settings["delayBetweenImages"]}";
     `;
 }
 
