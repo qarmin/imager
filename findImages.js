@@ -11,6 +11,7 @@ try {
 	// ignoredElementsLinksMode - "avatar,logo"
 	// usingCustomImageGathering - true, false
 	// delayBetweenImages - -infinity-infinity - lower than 0 means no delay
+	// ignoreImageSize - true, false
 
 	let links = document.querySelectorAll("a");
 	let images = document.querySelectorAll("img");
@@ -60,8 +61,10 @@ try {
 			return false;
 		}
 
-		if (width < minimumImageSize || height < minimumImageSize) {
-			return false;
+		if (!ignoreImageSize) {
+			if (width < minimumImageSize || height < minimumImageSize) {
+				return false;
+			}
 		}
 
 		if (ignoredElements) {

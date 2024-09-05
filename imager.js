@@ -5,6 +5,7 @@ let settingsList = [
 	["usingCustomImageGathering", true],
 	["rowsNumber", 6],
 	["minimumImageSize", 100],
+	["ignoreImageSize", false],
 	["delayBetweenImages", 0],
 	["ignoredElements", "avatar,logo."],
 	["ignoredElementsLinksMode", "avatar,logo."],
@@ -23,7 +24,7 @@ browser.storage.local.get("settings").then((res) => {
 	});
 });
 
-function processItems(showMode) {
+function processItems(showMode, windowId) {
 	let fileName;
 	if (["biggestMode", "galleryMode"].includes(showMode)) {
 		fileName = "./findImages.js";
@@ -39,7 +40,9 @@ function processItems(showMode) {
 		.then((tabs) => {
 			browser.storage.local.get("settings").then((res) => {
 				for (let tab of tabs) {
-					injectCode(tab.id, showMode, res["settings"], fileName);
+					if (windowId === tab.windowId) {
+						injectCode(tab.id, showMode, res["settings"], fileName);
+					}
 				}
 			});
 		})
@@ -50,16 +53,17 @@ function processItems(showMode) {
 
 function getSettingsVar(settings, showMode) {
 	return `
-    let showMode = "${showMode}";
-    let followAElements = ${settings["followAElements"]};
-    let ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
-    let loadImagesLazy = ${settings["loadImagesLazy"]};
-    let usingCustomImageGathering = ${settings["usingCustomImageGathering"]};
-    let rowsNumber = ${settings["rowsNumber"]};
-    let minimumImageSize = ${settings["minimumImageSize"]};
-    let ignoredElements = "${settings["ignoredElements"]}";
-    let ignoredElementsLinksMode = "${settings["ignoredElementsLinksMode"]}";
-    let delayBetweenImages = "${settings["delayBetweenImages"]}";
+    var showMode = "${showMode}";
+    var followAElements = ${settings["followAElements"]};
+    var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
+    var loadImagesLazy = ${settings["loadImagesLazy"]};
+    var usingCustomImageGathering = ${settings["usingCustomImageGathering"]};
+    var rowsNumber = ${settings["rowsNumber"]};
+    var minimumImageSize = ${settings["minimumImageSize"]};
+    var ignoredElements = "${settings["ignoredElements"]}";
+    var ignoredElementsLinksMode = "${settings["ignoredElementsLinksMode"]}";
+    var delayBetweenImages = "${settings["delayBetweenImages"]}";
+    var ignoreImageSize = ${settings["ignoreImageSize"]};
     `;
 }
 
@@ -102,7 +106,7 @@ browser.menus.create({
 
 browser.menus.onClicked.addListener((info, tab) => {
 	if (["biggestMode", "galleryMode", "collectLinksMode"].includes(info.menuItemId)) {
-		processItems(info.menuItemId);
+		processItems(info.menuItemId, tab.windowId);
 	} else {
 		console.error("Unknown menu item", info.menuItemId);
 	}
