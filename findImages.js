@@ -15,10 +15,12 @@ try {
 
 	let links = document.querySelectorAll("a");
 	let images = document.querySelectorAll("img");
+	let sources = document.querySelectorAll("source");
 	let notAddedImageUrls = [];
 
 	// Looks that some pages uses images as links, without proper extension
 	let imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"];
+	let imageExtensionsWithoutDot = imageExtensions.map((ext) => ext.slice(1));
 	let disallowedExtensions = [".mp4"];
 
 	function processCustomImageLink(url) {
@@ -104,6 +106,23 @@ try {
 			addImage(im.src, im.naturalWidth, im.naturalHeight);
 		}
 	}
+	for (const source of sources) {
+		let type = source.type || "";
+		if (!imageExtensionsWithoutDot.some((ext) => type.endsWith(ext))) {
+			continue;
+		}
+		let url = source.srcset || source.src;
+		let width = source.width || 0;
+		let height = source.height || 0;
+
+		// strip // at start
+		if (url.startsWith("//")) {
+			url = url.slice(2);
+			url = "https://" + url;
+		}
+
+		addImage(url, width, height);
+	}
 
 	function removeAllItems() {
 		document.body.innerHTML = "";
@@ -130,6 +149,55 @@ try {
 		}
 	}
 
+	function addDelayBetweenImages() {
+		if (delayBetweenImages > 0) {
+			const script = document.createElement("script");
+			script.textContent = `
+    (function() {
+      let index = 0;
+      const images = document.querySelectorAll('img');
+
+		console.error("Current images", index, images.length);
+      function loadNextImage() {
+      console.error("Current images", index, images.length);
+        if (index >= images.length) {
+          return;
+        }
+
+        const img = images[index];
+        if (img && img.alt) {
+          img.src = img.alt;
+        }
+
+        index++;
+        setTimeout(loadNextImage, ${delayBetweenImages});
+      }
+
+      loadNextImage();
+    })();
+  `;
+			document.body.appendChild(script);
+		}
+	}
+
+	function addScriptToLoadHeightSize() {
+		const script = document.createElement("script");
+		script.textContent = `
+    (function() {
+      const images = document.querySelectorAll('img');
+      images.forEach((img) => {
+        img.onload = function() {
+          const sizeInfo = img.nextElementSibling;
+          if (sizeInfo && sizeInfo.id && sizeInfo.id.startsWith('sizeInfo-')) {
+            sizeInfo.textContent = \`\${img.naturalWidth}x\${img.naturalHeight}\`;
+          }
+        };
+      });
+    })();
+  `;
+		document.body.appendChild(script);
+	}
+
 	removeAllItems();
 	document.body.style.backgroundColor = "#252525";
 	document.body.style.height = "100vh";
@@ -150,10 +218,13 @@ try {
 	}
 
 	let setImageInBiggestMode = false;
+	let imageIdx = 0;
 	for (let all_info of imageUrls) {
 		let image_src = all_info.src;
-		let width = all_info.width;
-		let height = all_info.height;
+		// Set width to 100 if is 0, to not put everything in one column
+		// Not really optimal, but better than nothing
+		let width = all_info.width || 100;
+		let height = all_info.height || 100;
 
 		let aItem = document.createElement("a");
 		let img = document.createElement("img");
@@ -167,10 +238,28 @@ try {
 		if (loadImagesLazy) {
 			img.loading = "lazy";
 		}
-		img.alt = image_src;
+		// img.alt = image_src; // Using src, will sometimes break layout
+		img.alt = "Missing";
 		img.style.objectFit = "contain";
 		img.style.width = "100%";
 		aItem.appendChild(img);
+
+		let sizeInfo = document.createElement("div");
+		// sizeInfo.textContent = `${width}x${height}`;
+		sizeInfo.id = "sizeInfo-" + imageIdx;
+		imageIdx += 1;
+		sizeInfo.style.position = "absolute";
+		sizeInfo.style.bottom = "0";
+		sizeInfo.style.left = "50%";
+		sizeInfo.style.transform = "translateX(-50%)"; // Center the text horizontally
+		sizeInfo.style.color = "white"; // Set text color to white
+		// sizeInfo.style.textShadow = "1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white"; // Add white outline
+		sizeInfo.style.textShadow = "1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black"; // Add black outline
+		sizeInfo.style.padding = "2px 5px";
+		sizeInfo.style.pointerEvents = "none"; // Ensure the div does not capture clicks
+
+		aItem.style.position = "relative"; // Ensure the container is positioned
+		aItem.appendChild(sizeInfo);
 
 		if (showMode !== "biggestMode") {
 			// Find in itemsHeight the lowest index
@@ -228,34 +317,8 @@ try {
 			}
 			document.body.appendChild(flexContainer);
 
-			if (delayBetweenImages > 0) {
-				const script = document.createElement("script");
-				script.textContent = `
-    (function() {
-      let index = 0;
-      const images = document.querySelectorAll('img');
-
-		console.error("Current images", index, images.length);
-      function loadNextImage() {
-      console.error("Current images", index, images.length);
-        if (index >= images.length) {
-          return;
-        }
-
-        const img = images[index];
-        if (img && img.alt) {
-          img.src = img.alt;
-        }
-
-        index++;
-        setTimeout(loadNextImage, ${delayBetweenImages});
-      }
-
-      loadNextImage();
-    })();
-  `;
-				document.body.appendChild(script);
-			}
+			addScriptToLoadHeightSize();
+			addDelayBetweenImages();
 		} else {
 			setNoImagesFoundText();
 		}
