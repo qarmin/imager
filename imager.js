@@ -1,5 +1,6 @@
 let settingsList = [
 	["followAElements", true],
+	["preserveSrcAndHref", false],
 	["ignoreNonImageLinks", true],
 	["loadImagesLazy", false],
 	["usingCustomImageGathering", true],
@@ -55,6 +56,7 @@ function getSettingsVar(settings, showMode) {
 	return `
     var showMode = "${showMode}";
     var followAElements = ${settings["followAElements"]};
+    var preserveSrcAndHref = ${settings["preserveSrcAndHref"]};
     var ignoreNonImageLinks = ${settings["ignoreNonImageLinks"]};
     var loadImagesLazy = ${settings["loadImagesLazy"]};
     var usingCustomImageGathering = ${settings["usingCustomImageGathering"]};

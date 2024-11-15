@@ -1,8 +1,9 @@
 let imageUrls = [];
-let onlyImageUrls = [];
+let showedImageUrls = []; // variable to store already showed images - situation when two images will point to different href will be quite rare, so no need to add e.g. hrefImageUrls
 try {
 	// showMode - "biggestMode", "galleryMode"
 	// followAElements - true, false
+	// preserveSrcAndHref - true, false // Conflicts with followAElements, if set have bigger priority than followAElements
 	// ignoreNonImageLinks - true, false
 	// loadImagesLazy - true, false
 	// rowsNumber - 1-infinity
@@ -43,54 +44,79 @@ try {
 		return url;
 	}
 
-	function deduplicateArray(arr) {
-		return [...new Set(arr)];
-	}
+	// function deduplicateArray(arr) {
+	// 	return [...new Set(arr)];
+	// }
 
-	function addImage(url, width, height) {
+	// Return returns validated url or null
+	function validateUrl(url, width, height) {
 		let validatedUrl = processCustomImageLink(url);
 		if (
-			validatedUrl == "" ||
+			validatedUrl === "" ||
 			notAddedImageUrls.includes(validatedUrl) ||
-			onlyImageUrls.includes(validatedUrl) ||
+			showedImageUrls.includes(validatedUrl) ||
 			disallowedExtensions.some((ext) => validatedUrl.endsWith(ext))
 		) {
-			return false;
+			return null;
 		}
 
 		let urlLower = validatedUrl.toLowerCase();
 		if (ignoreNonImageLinks && !imageExtensions.some((ext) => urlLower.includes(ext))) {
-			return false;
+			return null;
 		}
 
 		if (!ignoreImageSize) {
 			if (width < minimumImageSize || height < minimumImageSize) {
-				return false;
+				return null;
 			}
 		}
 
 		if (ignoredElements) {
 			for (let el of ignoredElements.split(",")) {
 				if (el.length !== 0 && validatedUrl.includes(el)) {
-					return false;
+					return null;
 				}
 			}
 		}
-		imageUrls.push({ src: validatedUrl, width: width, height: height });
-		onlyImageUrls.push(validatedUrl);
+		return validatedUrl;
+	}
+
+	function addImage(urlImageToShow, urlHref, width, height) {
+		let urlHrefValidated = validateUrl(urlHref, width, height);
+		if (!urlHrefValidated) {
+			return false;
+		}
+		let urlImageToShowValidated = validateUrl(urlImageToShow);
+		if (!urlImageToShowValidated) {
+			return false;
+		}
+
+		imageUrls.push({
+			urlImageToShow: urlImageToShowValidated,
+			urlHref: urlHrefValidated,
+			width: width,
+			height: height,
+		});
+		showedImageUrls.push(urlImageToShowValidated);
 		return true;
 	}
 
-	if (followAElements) {
-		for (let link of links) {
-			let image = link.querySelector("img");
-			if (image) {
-				let im_height = image.naturalHeight || image.height;
-				let im_width = image.naturalWidth || image.width;
-				let added = false;
-				added = addImage(link.href, im_width, im_height);
+	for (let link of links) {
+		let image = link.querySelector("img");
+		if (image) {
+			let im_height = image.naturalHeight || image.height;
+			let im_width = image.naturalWidth || image.width;
+
+			let added = false;
+			if (preserveSrcAndHref) {
+				added = addImage(image.src, link.href, im_width, im_height);
+			}
+			if (preserveSrcAndHref || followAElements) {
 				if (!added) {
-					addImage(image.src, im_width, im_height);
+					added = addImage(link.href, link.href, im_width, im_height);
+				}
+				if (!added) {
+					added = addImage(image.src, image.src, im_width, im_height);
 				} else {
 					notAddedImageUrls.push(image.src);
 				}
@@ -101,9 +127,9 @@ try {
 	// Iterate over all images
 	for (const im of images) {
 		if (im.naturalWidth === 0 || im.naturalHeight === 0) {
-			addImage(im.src, im.width, im.height);
+			addImage(im.src, im.src, im.width, im.height);
 		} else {
-			addImage(im.src, im.naturalWidth, im.naturalHeight);
+			addImage(im.src, im.src, im.naturalWidth, im.naturalHeight);
 		}
 	}
 	for (const source of sources) {
@@ -121,7 +147,7 @@ try {
 			url = "https://" + url;
 		}
 
-		addImage(url, width, height);
+		addImage(url, url, width, height);
 	}
 
 	function removeAllItems() {
@@ -220,7 +246,7 @@ try {
 	let setImageInBiggestMode = false;
 	let imageIdx = 0;
 	for (let all_info of imageUrls) {
-		let image_src = all_info.src;
+		let image_src = all_info.urlImageToShow;
 		// Set width to 100 if is 0, to not put everything in one column
 		// Not really optimal, but better than nothing
 		let width = all_info.width || 100;
@@ -229,7 +255,7 @@ try {
 		let aItem = document.createElement("a");
 		let img = document.createElement("img");
 		//		console.error(img.width, img.height, width, height, img.naturalWidth, img.naturalHeight, image_src);
-		aItem.href = image_src;
+		aItem.href = all_info.urlHref;
 		aItem.width = 100 / rowsNumber + "%";
 
 		if (delayBetweenImages <= 0) {
@@ -238,7 +264,7 @@ try {
 		if (loadImagesLazy) {
 			img.loading = "lazy";
 		}
-		// img.alt = image_src; // Using src, will sometimes break layout
+		// img.alt = image_src; // Using src, will sometimes break layout because takes too much space
 		img.alt = "Missing";
 		img.style.objectFit = "contain";
 		img.style.width = "100%";

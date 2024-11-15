@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.querySelector("#followAElements").addEventListener("change", saveOptions);
+document.querySelector("#preserveSrcAndHref").addEventListener("change", saveOptions);
 document.querySelector("#ignoreNonImageLinks").addEventListener("change", saveOptions);
 document.querySelector("#loadImagesLazy").addEventListener("change", saveOptions);
 document.querySelector("#usingCustomImageGathering").addEventListener("change", saveOptions);
@@ -21,6 +22,7 @@ function saveOptions(e) {
 				"loadImagesLazy",
 				"usingCustomImageGathering",
 				"ignoreImageSize",
+				"preserveSrcAndHref",
 			].includes(key)
 		) {
 			modifiedSettings[key] = e.target.checked;
@@ -43,6 +45,7 @@ function saveOptions(e) {
 function restoreOptions() {
 	browser.storage.local.get("settings").then((res) => {
 		document.querySelector("#followAElements").checked = res["settings"]["followAElements"];
+		document.querySelector("#preserveSrcAndHref").checked = res["settings"]["preserveSrcAndHref"];
 		document.querySelector("#ignoreNonImageLinks").checked = res["settings"]["ignoreNonImageLinks"];
 		document.querySelector("#loadImagesLazy").checked = res["settings"]["loadImagesLazy"];
 		document.querySelector("#usingCustomImageGathering").checked = res["settings"]["usingCustomImageGathering"];
