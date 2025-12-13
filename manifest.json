@@ -7,6 +7,14 @@
 		"scripts": ["imager.js", "delayedTabOpener.js", "tabCloser.js"],
 		"persistent": true
 	},
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "{4b5f4f99-38bd-441d-9f1f-4816caa6535a}",
+			"data_collection_permissions": {
+				"required": ["none"]
+			}
+		}
+	},
 	"icons": {
 		"16": "icons/icon_16.png",
 		"32": "icons/icon_32.png",

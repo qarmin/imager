@@ -125,7 +125,8 @@ document.getElementById("checkRules").addEventListener("click", () => {
 	const rules = document.getElementById("closerRules").value;
 	const statsDiv = document.getElementById("stats");
 
-	statsDiv.innerHTML = '<div style="text-align: center;">Checking tabs...</div>';
+	statsDiv.textContent = "Checking tabs...";
+	statsDiv.style.textAlign = "center";
 
 	chrome.runtime.sendMessage(
 		{
@@ -133,20 +134,58 @@ document.getElementById("checkRules").addEventListener("click", () => {
 			rules: rules,
 		},
 		(response) => {
+			// Clear previous content
+			statsDiv.textContent = "";
+			statsDiv.style.textAlign = "";
+
 			if (response) {
-				let html = `<div><strong>Statistics:</strong></div>`;
-				html += `<div class="stat-item">Total tabs: ${response.totalTabs}</div>`;
-				html += `<div class="stat-item">Tabs to close: ${response.tabs.length}</div>`;
-				html += `<div class="stat-item">Tabs to keep: ${response.totalTabs - response.tabs.length}</div>`;
-				html += `<br><div><strong>Matches per rule:</strong></div>`;
+				// Create statistics header
+				const headerDiv = document.createElement("div");
+				const headerStrong = document.createElement("strong");
+				headerStrong.textContent = "Statistics:";
+				headerDiv.appendChild(headerStrong);
+				statsDiv.appendChild(headerDiv);
 
+				// Total tabs
+				const totalDiv = document.createElement("div");
+				totalDiv.className = "stat-item";
+				totalDiv.textContent = `Total tabs: ${response.totalTabs}`;
+				statsDiv.appendChild(totalDiv);
+
+				// Tabs to close
+				const toCloseDiv = document.createElement("div");
+				toCloseDiv.className = "stat-item";
+				toCloseDiv.textContent = `Tabs to close: ${response.tabs.length}`;
+				statsDiv.appendChild(toCloseDiv);
+
+				// Tabs to keep
+				const toKeepDiv = document.createElement("div");
+				toKeepDiv.className = "stat-item";
+				toKeepDiv.textContent = `Tabs to keep: ${response.totalTabs - response.tabs.length}`;
+				statsDiv.appendChild(toKeepDiv);
+
+				// Line break
+				statsDiv.appendChild(document.createElement("br"));
+
+				// Matches per rule header
+				const rulesHeaderDiv = document.createElement("div");
+				const rulesHeaderStrong = document.createElement("strong");
+				rulesHeaderStrong.textContent = "Matches per rule:";
+				rulesHeaderDiv.appendChild(rulesHeaderStrong);
+				statsDiv.appendChild(rulesHeaderDiv);
+
+				// Individual rule stats
 				for (const [rule, count] of Object.entries(response.stats)) {
-					html += `<div class="stat-item">"${rule}": ${count} tab(s)</div>`;
+					const ruleDiv = document.createElement("div");
+					ruleDiv.className = "stat-item";
+					ruleDiv.textContent = `"${rule}": ${count} tab(s)`;
+					statsDiv.appendChild(ruleDiv);
 				}
-
-				statsDiv.innerHTML = html;
 			} else {
-				statsDiv.innerHTML = '<div style="color: red;">Error checking rules</div>';
+				const errorDiv = document.createElement("div");
+				errorDiv.style.color = "red";
+				errorDiv.textContent = "Error checking rules";
+				statsDiv.appendChild(errorDiv);
 			}
 		},
 	);
@@ -161,7 +200,11 @@ document.getElementById("closeRules").addEventListener("click", async () => {
 		return;
 	}
 
-	statsDiv.innerHTML = '<div style="text-align: center;">Closing tabs...</div>';
+	statsDiv.textContent = "";
+	statsDiv.style.textAlign = "center";
+	const closingDiv = document.createElement("div");
+	closingDiv.textContent = "Closing tabs...";
+	statsDiv.appendChild(closingDiv);
 
 	chrome.runtime.sendMessage(
 		{
@@ -169,17 +212,38 @@ document.getElementById("closeRules").addEventListener("click", async () => {
 			rules: rules,
 		},
 		(response) => {
-			if (response) {
-				let html = `<div><strong>Result:</strong></div>`;
-				html += `<div class="stat-item">Closed: ${response.closed} tab(s)</div>`;
-				html += `<div class="stat-item">Kept: ${response.kept} tab(s)</div>`;
-				if (response.emptyCreated) {
-					html += `<div class="stat-item" style="color: green;">Created empty tab</div>`;
-				}
+			statsDiv.textContent = "";
+			statsDiv.style.textAlign = "";
 
-				statsDiv.innerHTML = html;
+			if (response) {
+				const resultHeaderDiv = document.createElement("div");
+				const resultHeaderStrong = document.createElement("strong");
+				resultHeaderStrong.textContent = "Result:";
+				resultHeaderDiv.appendChild(resultHeaderStrong);
+				statsDiv.appendChild(resultHeaderDiv);
+
+				const closedDiv = document.createElement("div");
+				closedDiv.className = "stat-item";
+				closedDiv.textContent = `Closed: ${response.closed} tab(s)`;
+				statsDiv.appendChild(closedDiv);
+
+				const keptDiv = document.createElement("div");
+				keptDiv.className = "stat-item";
+				keptDiv.textContent = `Kept: ${response.kept} tab(s)`;
+				statsDiv.appendChild(keptDiv);
+
+				if (response.emptyCreated) {
+					const emptyDiv = document.createElement("div");
+					emptyDiv.className = "stat-item";
+					emptyDiv.style.color = "green";
+					emptyDiv.textContent = "Created empty tab";
+					statsDiv.appendChild(emptyDiv);
+				}
 			} else {
-				statsDiv.innerHTML = '<div style="color: red;">Error closing tabs</div>';
+				const errorDiv = document.createElement("div");
+				errorDiv.style.color = "red";
+				errorDiv.textContent = "Error closing tabs";
+				statsDiv.appendChild(errorDiv);
 			}
 		},
 	);
