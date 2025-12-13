@@ -1,3 +1,7 @@
+1.7.0 - 13.12.2025
+- Added new mode to close tabs which contains specific text in page
+- Added new mode to automatically open tabs
+
 1.6.0 - 15.10.2024
 - Added option to preserve both image src and href
 
