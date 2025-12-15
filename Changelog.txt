@@ -1,3 +1,6 @@
+1.7.1 - 15.12.2025
+- Expanded the text scanning logic to include iframe content
+
 1.7.0 - 13.12.2025
 - Added new mode to close tabs which contains specific text in page
 - Added new mode to automatically open tabs

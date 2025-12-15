@@ -26,8 +26,11 @@ function parseCloserRules(text) {
 
 // Check which tabs match the rules
 function checkTabsAgainstRules(rules, callback) {
+	console.log("[BACKGROUND] checkTabsAgainstRules called with", rules.length, "rules");
 	chrome.tabs.query({}, (tabs) => {
+		console.log("[BACKGROUND] Found", tabs.length, "tabs to check");
 		if (rules.length === 0 || tabs.length === 0) {
+			console.log("[BACKGROUND] No rules or tabs, returning empty result");
 			callback({ tabs: [], stats: {}, totalTabs: tabs.length });
 			return;
 		}
@@ -35,10 +38,13 @@ function checkTabsAgainstRules(rules, callback) {
 		let completed = 0;
 		const totalChecks = tabs.length * rules.length;
 		const results = new Map(); // tabId -> matching rules
+		console.log("[BACKGROUND] Total checks to perform:", totalChecks);
 
 		const checkComplete = () => {
 			completed++;
+			console.log(`[BACKGROUND] Check complete ${completed}/${totalChecks}`);
 			if (completed === totalChecks) {
+				console.log("[BACKGROUND] All checks completed!");
 				// All checks completed
 				const matchingTabs = Array.from(results.values());
 
@@ -70,26 +76,50 @@ function checkTabsAgainstRules(rules, callback) {
 				const urlMatches = !rule.url || tab.url.includes(rule.url);
 
 				if (urlMatches && !tab.url.startsWith("chrome://") && !tab.url.startsWith("chrome-extension://")) {
-					// Check if page contains the text
-					chrome.tabs.sendMessage(tab.id, { action: "searchText", text: rule.text }, (response) => {
-						if (chrome.runtime.lastError) {
-							// Tab doesn't support content scripts (e.g., chrome:// pages)
-							checkComplete();
-							return;
-						}
-
-						if (response && response.found) {
-							if (!results.has(tab.id)) {
-								results.set(tab.id, {
-									tab: tab,
-									rules: [],
-								});
+					// Execute search in ALL frames of the tab
+					console.log(`[BACKGROUND] Executing search in tab ${tab.id} for text: "${rule.text}"`);
+					chrome.tabs.executeScript(
+						tab.id,
+						{
+							allFrames: true,
+							code: `
+								(function() {
+									const text = ${JSON.stringify(rule.text)};
+									const bodyText = document.body?.innerText || document.body?.textContent || "";
+									const found = bodyText.includes(text);
+									const frameInfo = window === window.top ? "TOP" : "IFRAME";
+									console.log("[EXEC] Frame: " + frameInfo + ", URL: " + window.location.href + ", Found: " + found);
+									return found;
+								})();
+							`,
+						},
+						(frameResults) => {
+							if (chrome.runtime.lastError) {
+								console.log(`[BACKGROUND] Error in tab ${tab.id}:`, chrome.runtime.lastError.message);
+								checkComplete();
+								return;
 							}
-							results.get(tab.id).rules.push(rule);
-						}
 
-						checkComplete();
-					});
+							// frameResults is an array - one result per frame
+							// If ANY frame returns true, the text was found
+							const foundInAnyFrame = frameResults && frameResults.some((result) => result === true);
+							console.log(
+								`[BACKGROUND] Tab ${tab.id} frameResults: ${frameResults ? frameResults.length : 0} frames, found in any: ${foundInAnyFrame}`,
+							);
+
+							if (foundInAnyFrame) {
+								if (!results.has(tab.id)) {
+									results.set(tab.id, {
+										tab: tab,
+										rules: [],
+									});
+								}
+								results.get(tab.id).rules.push(rule);
+							}
+
+							checkComplete();
+						},
+					);
 				} else {
 					checkComplete();
 				}

@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Imager",
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"permissions": ["menus", "contextMenus", "tabs", "<all_urls>", "storage"],
 	"background": {
 		"scripts": ["imager.js", "delayedTabOpener.js", "tabCloser.js"],
@@ -26,7 +26,8 @@
 		{
 			"matches": ["<all_urls>"],
 			"js": ["contentScript.js"],
-			"run_at": "document_idle"
+			"run_at": "document_idle",
+			"all_frames": true
 		}
 	],
 	"browser_action": {

@@ -125,15 +125,20 @@ document.getElementById("checkRules").addEventListener("click", () => {
 	const rules = document.getElementById("closerRules").value;
 	const statsDiv = document.getElementById("stats");
 
+	console.log("[POPUP] Check Rules button clicked!");
+	console.log("[POPUP] Rules text:", rules);
+
 	statsDiv.textContent = "Checking tabs...";
 	statsDiv.style.textAlign = "center";
 
+	console.log("[POPUP] Sending checkCloserRules message to background...");
 	chrome.runtime.sendMessage(
 		{
 			action: "checkCloserRules",
 			rules: rules,
 		},
 		(response) => {
+			console.log("[POPUP] Received response from background:", response);
 			// Clear previous content
 			statsDiv.textContent = "";
 			statsDiv.style.textAlign = "";
@@ -195,7 +200,11 @@ document.getElementById("closeRules").addEventListener("click", async () => {
 	const rules = document.getElementById("closerRules").value;
 	const statsDiv = document.getElementById("stats");
 
+	console.log("[POPUP] Close Rules button clicked!");
+	console.log("[POPUP] Rules text:", rules);
+
 	const confirmed = await showConfirm("Are you sure you want to close matching tabs?");
+	console.log("[POPUP] User confirmed:", confirmed);
 	if (!confirmed) {
 		return;
 	}
@@ -206,12 +215,14 @@ document.getElementById("closeRules").addEventListener("click", async () => {
 	closingDiv.textContent = "Closing tabs...";
 	statsDiv.appendChild(closingDiv);
 
+	console.log("[POPUP] Sending closeMatchingTabs message to background...");
 	chrome.runtime.sendMessage(
 		{
 			action: "closeMatchingTabs",
 			rules: rules,
 		},
 		(response) => {
+			console.log("[POPUP] Received response from background:", response);
 			statsDiv.textContent = "";
 			statsDiv.style.textAlign = "";
 
