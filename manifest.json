@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Imager",
-	"version": "1.7.1",
+	"version": "1.8.0",
 	"permissions": ["menus", "contextMenus", "tabs", "<all_urls>", "storage"],
 	"background": {
 		"scripts": ["imager.js", "delayedTabOpener.js", "tabCloser.js"],
@@ -35,8 +35,5 @@
 		"default_icon": {
 			"64": "icons/icon_64.png"
 		}
-	},
-	"options_ui": {
-		"page": "options.html"
 	}
 }

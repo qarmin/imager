@@ -1,3 +1,7 @@
+1.8.0 - 20.12.2025
+- Added option to skip waiting for full page load in closer tool
+- Added new SeenThis mode, that allows to ignore already seen images
+
 1.7.1 - 15.12.2025
 - Expanded the text scanning logic to include iframe content
 

@@ -25,17 +25,19 @@ function parseCloserRules(text) {
 }
 
 // Check which tabs match the rules
-function checkTabsAgainstRules(rules, callback) {
+function checkTabsAgainstRules(rules, dontWaitForLoad, callback) {
 	console.log("[BACKGROUND] checkTabsAgainstRules called with", rules.length, "rules");
+	console.log("[BACKGROUND] dontWaitForLoad:", dontWaitForLoad);
 	chrome.tabs.query({}, (tabs) => {
 		console.log("[BACKGROUND] Found", tabs.length, "tabs to check");
 		if (rules.length === 0 || tabs.length === 0) {
 			console.log("[BACKGROUND] No rules or tabs, returning empty result");
-			callback({ tabs: [], stats: {}, totalTabs: tabs.length });
+			callback({ tabs: [], stats: {}, totalTabs: tabs.length, skippedTabs: 0 });
 			return;
 		}
 
 		let completed = 0;
+		const skippedTabIds = new Set(); // Track unique skipped tabs
 		const totalChecks = tabs.length * rules.length;
 		const results = new Map(); // tabId -> matching rules
 		console.log("[BACKGROUND] Total checks to perform:", totalChecks);
@@ -66,6 +68,7 @@ function checkTabsAgainstRules(rules, callback) {
 					tabs: matchingTabs,
 					stats: stats,
 					totalTabs: tabs.length,
+					skippedTabs: skippedTabIds.size,
 				});
 			}
 		};
@@ -76,6 +79,14 @@ function checkTabsAgainstRules(rules, callback) {
 				const urlMatches = !rule.url || tab.url.includes(rule.url);
 
 				if (urlMatches && !tab.url.startsWith("chrome://") && !tab.url.startsWith("chrome-extension://")) {
+					// Check if we should skip unloaded tabs
+					if (dontWaitForLoad && tab.status !== "complete") {
+						console.log(`[BACKGROUND] Skipping tab ${tab.id} (status: ${tab.status}, not loaded)`);
+						skippedTabIds.add(tab.id);
+						checkComplete();
+						return;
+					}
+
 					// Execute search in ALL frames of the tab
 					console.log(`[BACKGROUND] Executing search in tab ${tab.id} for text: "${rule.text}"`);
 					chrome.tabs.executeScript(
@@ -129,8 +140,8 @@ function checkTabsAgainstRules(rules, callback) {
 }
 
 // Close tabs that match rules, but keep at least 1 tab
-function closeMatchingTabs(rules, callback) {
-	checkTabsAgainstRules(rules, (result) => {
+function closeMatchingTabs(rules, dontWaitForLoad, callback) {
+	checkTabsAgainstRules(rules, dontWaitForLoad, (result) => {
 		const tabIdsToClose = result.tabs.map((item) => item.tab.id);
 
 		chrome.tabs.query({}, (allTabs) => {
@@ -142,10 +153,10 @@ function closeMatchingTabs(rules, callback) {
 				if (totalTabs === 0) {
 					// Create an empty tab
 					chrome.tabs.create({ url: "about:blank" }, () => {
-						callback({ closed: 0, kept: 1, emptyCreated: true });
+						callback({ closed: 0, kept: 1, emptyCreated: true, skippedTabs: result.skippedTabs });
 					});
 				} else {
-					callback({ closed: 0, kept: totalTabs, emptyCreated: false });
+					callback({ closed: 0, kept: totalTabs, emptyCreated: false, skippedTabs: result.skippedTabs });
 				}
 				return;
 			}
@@ -162,6 +173,7 @@ function closeMatchingTabs(rules, callback) {
 							closed: closed,
 							kept: totalTabs - closed,
 							emptyCreated: false,
+							skippedTabs: result.skippedTabs,
 						});
 					}
 				});
@@ -174,7 +186,8 @@ function closeMatchingTabs(rules, callback) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if (request.action === "checkCloserRules") {
 		const rules = parseCloserRules(request.rules);
-		checkTabsAgainstRules(rules, (result) => {
+		const dontWaitForLoad = request.dontWaitForLoad !== undefined ? request.dontWaitForLoad : true;
+		checkTabsAgainstRules(rules, dontWaitForLoad, (result) => {
 			sendResponse(result);
 		});
 		return true; // Keep channel open for async response
@@ -182,7 +195,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 	if (request.action === "closeMatchingTabs") {
 		const rules = parseCloserRules(request.rules);
-		closeMatchingTabs(rules, (result) => {
+		const dontWaitForLoad = request.dontWaitForLoad !== undefined ? request.dontWaitForLoad : true;
+		closeMatchingTabs(rules, dontWaitForLoad, (result) => {
 			sendResponse(result);
 		});
 		return true; // Keep channel open for async response

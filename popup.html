@@ -4,16 +4,94 @@
     <meta charset="UTF-8">
     <title>Tab Manager</title>
     <style>
-        body { font-family: Arial, sans-serif; width: 350px; padding: 10px; }
+        body { font-family: Arial, sans-serif; width: 500px; padding: 10px; }
         textarea { width: 100%; height: 100px; box-sizing: border-box; }
         button { width: 100%; margin-top: 10px; padding: 5px; }
         .mode-switcher { display: flex; margin-bottom: 15px; }
-        .mode-switcher button { flex: 1; margin: 0 2px; }
-        .mode-switcher button.active { background-color: #4CAF50; color: white; }
+        .mode-switcher button {
+            flex: 1;
+            margin: 0 2px;
+            background: white;
+            color: #333;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            padding: 8px 5px;
+        }
+        .mode-switcher button:hover {
+            background: #f0f0f0;
+            border-color: #4CAF50;
+        }
+        .mode-switcher button.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
         .mode-content { display: none; }
         .mode-content.active { display: block; }
-        #stats { margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 12px; }
-        .stat-item { margin: 3px 0; }
+
+        h3 {
+            font-size: 15px;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+            color: #333;
+            font-weight: 600;
+        }
+        h3:first-child { margin-top: 0; }
+
+        label {
+            display: block;
+            margin: 8px 0;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+
+        p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+
+        #stats {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            font-size: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        .stat-item { margin: 5px 0; }
+
+        /* Settings tab styles */
+        #settingsContent { font-size: 13px; }
+        #settingsContent label { display: block; margin: 8px 0; }
+        #settingsContent input[type="checkbox"] { margin-right: 8px; }
+        #settingsContent input[type="number"],
+        #settingsContent input[type="text"] { width: 60px; margin-right: 5px; vertical-align: middle; }
+        #settingsContent input[type="text"] { width: 100%; margin-top: 5px; }
+        .settings-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
 
         /* Modal styles */
         .modal-overlay {
@@ -57,10 +135,13 @@
 <div class="mode-switcher">
     <button id="openerMode" class="active">Opener</button>
     <button id="closerMode">Closer</button>
+    <button id="seenThisMode">SeenThis</button>
+    <button id="settingsMode">Settings</button>
 </div>
 
+<div class="content-wrapper">
+
 <div id="openerContent" class="mode-content active">
-    <h2>Delayed Tab Opener</h2>
     <h3>Enter Links (one per line)</h3>
     <textarea id="links"></textarea>
     <label for="delay">Delay (seconds):</label>
@@ -76,13 +157,105 @@
 </div>
 
 <div id="closerContent" class="mode-content">
-    <h2>Tab Closer</h2>
     <h3>Rules (one per line)</h3>
     <p style="font-size: 11px; margin: 5px 0;">Format: <code>url --- text</code> or <code>--- text</code> (all pages)</p>
     <textarea id="closerRules" rows="8"></textarea>
+    <label>
+        <input type="checkbox" id="dontWaitForLoad" checked>
+        Don't wait for site loading
+    </label>
     <button id="checkRules">Check</button>
     <button id="closeRules">Close Tabs</button>
     <div id="stats"></div>
+</div>
+
+<div id="seenThisContent" class="mode-content">
+    <h3>Auto-Filtering</h3>
+    <p style="font-size: 11px; margin: 5px 0;">Automatically apply image filtering when loading pages from specified domains.</p>
+    <label>
+        <input type="checkbox" id="autoFilterEnabled">
+        Enable auto-filtering on page load
+    </label>
+    <label style="margin-top: 10px; display: block;">
+        <strong>Domains to auto-filter</strong> (one per line):
+        <textarea id="autoFilterDomains" rows="4" style="width: 100%; box-sizing: border-box; margin-top: 5px;" placeholder="example.com
+another-site.com"></textarea>
+    </label>
+
+    <h3 style="margin-top: 15px;">Filtered Images</h3>
+    <p style="font-size: 11px; margin: 5px 0;">Images matching these URLs will be replaced with striped pattern. Latest filters appear at the top.</p>
+    <textarea id="seenThisFilters" rows="8" placeholder="// 20.12.2025 14:55 - site.com
+http://example.com/image.jpg
+https://example.com/photo.png"></textarea>
+
+    <h3 style="margin-top: 15px;">Exclusions</h3>
+    <p style="font-size: 11px; margin: 5px 0;">Images matching these URLs will NOT be filtered.</p>
+    <textarea id="seenThisExclusions" rows="5" placeholder="http://example.com/important.jpg
+https://example.com/keep-this.png"></textarea>
+
+    <button id="clearFilters">Clear All Filters</button>
+</div>
+
+<div id="settingsContent" class="mode-content">
+    <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 12px; border-left: 3px solid #2196F3;">
+        <p style="margin: 3px 0;"><strong>[IM]</strong> Image Mode - Gallery & Biggest</p>
+        <p style="margin: 3px 0;"><strong>[LM]</strong> Links Mode - Collect Links</p>
+    </div>
+
+    <div class="settings-section">
+        <label>
+            <input type="checkbox" id="followAElements">
+            <strong>[IM]</strong> Follow a elements - if image is inside an element, its href will be used instead image source
+        </label>
+        <label>
+            <input type="checkbox" id="preserveSrcAndHref">
+            <strong>[IM]</strong> Preserve src and href - if image is inside an element, its src and href will be preserved
+        </label>
+        <label>
+            <input type="checkbox" id="ignoreNonImageLinks">
+            <strong>[IM]</strong> Ignore non-image links - if src not ends with .jpg, .png etc. it will be ignored
+        </label>
+        <label>
+            <input type="checkbox" id="loadImagesLazy">
+            <strong>[IM]</strong> Load images lazy - image should be loaded when user scroll to image place
+        </label>
+        <label>
+            <input type="checkbox" id="usingCustomImageGathering">
+            <strong>[IM]</strong> Uses special rules for some of sites to gather images with bigger resolution
+        </label>
+        <label>
+            <input type="checkbox" id="ignoreImageSize">
+            <strong>[IM]</strong> Ignore image size - gathers images even without width/height(e.g. not loaded yet)
+        </label>
+    </div>
+
+    <div class="settings-section">
+        <label>
+            <input type="number" id="rowsNumber" min="1">
+            <strong>[IM]</strong> Number of rows to use
+        </label>
+        <label>
+            <input type="number" id="minimumImageSize" min="0">
+            <strong>[IM]</strong> Minimum image size to gather
+        </label>
+        <label>
+            <input type="number" id="delayBetweenImages">
+            <strong>[IM]</strong> Delay between loading images (0 or lower to disable)
+        </label>
+    </div>
+
+    <div class="settings-section">
+        <label>
+            <strong>[IM]</strong> List of ignored elements inside url (split by comma):
+            <input type="text" id="ignoredElements">
+        </label>
+        <label>
+            <strong>[LM]</strong> List of ignored elements inside url (split by comma):
+            <input type="text" id="ignoredElementsLinksMode">
+        </label>
+    </div>
+</div>
+
 </div>
 
 <!-- Confirmation Modal -->
